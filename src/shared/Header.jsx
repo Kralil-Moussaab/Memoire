@@ -21,13 +21,13 @@ export default function Header() {
     }`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div className="flex items-center">
-          <span className="text-2xl font-bold text-blue-600">Med-Link</span>
+          <Link to="." className="text-2xl font-bold text-blue-600">Med-Link</Link>
         </div>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <a href="" className="text-gray-700 hover:text-blue-600 font-medium">Home</a>
-          <a href="" className="text-gray-700 hover:text-blue-600 font-medium">Find Doctors</a>
+          <Link to="." className="text-gray-700 cursor-pointer hover:text-blue-600 font-medium">Home</Link>
+          <Link to="find" className="text-gray-700 cursor-pointer hover:text-blue-600 font-medium">Find Doctors</Link>
           <a href="" className="text-gray-700 hover:text-blue-600 font-medium">Online Consult</a>
           <Link to="/login">
           <button className="bg-blue-600 hover:cursor-pointer text-white px-6 py-2.5 rounded-md hover:bg-blue-700 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
