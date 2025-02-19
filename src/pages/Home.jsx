@@ -15,32 +15,31 @@ import {
 import cube from "../assets/cube.png";
 import patient from "../assets/patient.png";
 
-export default function Hero() {
+export default function Home() {
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-blue-100">
+    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">
       <div className="relative">
         {/* Hero Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20 pt-12">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="max-w-xl mb-12 md:mb-0 md:w-1/2">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Consult a Doctor Anytime,
                 <br />
-                Anywhere with <span className="text-blue-500">Med-Link</span>
+                Anywhere with{" "}
+                <span className="text-blue-500 dark:text-blue-400">
+                  Med-Link
+                </span>
               </h1>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
                 Book Your Next Appointment or Connect Instantly via Chat or
                 Video Call a particular doctor.
               </p>
-              <button className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+              <button className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors cursor-pointer">
                 Consult Now
               </button>
             </div>
-            <img
-              src={cube}
-              alt="Doctor"
-              className="w-1/3 hidden md:block"
-            />
+            <img src={cube} alt="Doctor" className="w-1/3 hidden md:block" />
           </div>
         </div>
 
@@ -81,7 +80,7 @@ export default function Hero() {
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <button className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+              <button className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer">
                 Search
               </button>
             </div>

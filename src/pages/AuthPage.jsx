@@ -5,11 +5,13 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">
       <div className="flex space-x-8 mb-4">
         <button
           className={`text-lg hover:cursor-pointer font-semibold ${
-            isLogin ? "text-blue-500  border-b-2 border-blue-500" : "text-black"
+            isLogin
+              ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
+              : "text-black dark:text-white"
           }`}
           onClick={() => setIsLogin(true)}
         >
@@ -18,8 +20,8 @@ export default function AuthPage() {
         <button
           className={`text-lg hover:cursor-pointer font-semibold ${
             !isLogin
-              ? "text-blue-500  border-b-2 border-blue-500"
-              : "text-black"
+              ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
+              : "text-black dark:text-white"
           }`}
           onClick={() => setIsLogin(false)}
         >
@@ -33,7 +35,7 @@ export default function AuthPage() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.9 }}
           transition={{ duration: 0.5 }}
-          className="bg-white p-6 rounded-lg shadow-lg w-[26rem]"
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-[26rem]"
         >
           {isLogin ? <LoginForm /> : <RegisterForm />}
         </motion.div>
@@ -88,16 +90,15 @@ function RegisterForm() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
     >
-        <span className="flex justify-between items-center">
-
-      <h2 className="text-xl font-semibold">Join Med-Link</h2>
-      <p className="text-sm text-gray-500">
-        Are you a doctor?{" "}
-        <a href="#" className="text-blue-500">
-          Register Here
-        </a>
-      </p>
-        </span>
+      <span className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Join Med-Link</h2>
+        <p className="text-sm text-gray-500">
+          Are you a doctor?{" "}
+          <a href="#" className="text-blue-500">
+            Register Here
+          </a>
+        </p>
+      </span>
       <input
         type="text"
         placeholder="Full Name"
