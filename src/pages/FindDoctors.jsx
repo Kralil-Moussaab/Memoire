@@ -63,11 +63,11 @@ export default function FindDoctors() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800">
       {/* Search Section with Filter */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="relative">
                 <MapPin
@@ -77,7 +77,7 @@ export default function FindDoctors() {
                 <input
                   type="text"
                   placeholder="Set your location"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="relative">
@@ -88,7 +88,7 @@ export default function FindDoctors() {
                 <input
                   type="text"
                   placeholder="Ex: Doctor, Hospital"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <button className="bg-blue-500 text-white px-8 cursor-pointer py-3 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors font-medium">
@@ -103,23 +103,23 @@ export default function FindDoctors() {
                   onClick={() =>
                     setShowAvailabilityDropdown(!showAvailabilityDropdown)
                   }
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-500 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
                 >
                   Availability
                   <ChevronDown size={16} />
                 </button>
                 {showAvailabilityDropdown && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
                     <div className="p-2">
-                      <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
-                        <input type="checkbox" className="mr-2" /> Available
+                      <label className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100">
+                        <input type="checkbox" className="mr-2" /> Availabl
                         Today
                       </label>
-                      <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100">
                         <input type="checkbox" className="mr-2" /> Available
                         Tomorrow
                       </label>
-                      <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100">
                         <input type="checkbox" className="mr-2" /> Available
                         This Week
                       </label>
@@ -131,21 +131,21 @@ export default function FindDoctors() {
               <div className="relative">
                 <button
                   onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-500 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
                 >
                   Filter
                   <ChevronDown size={16} />
                 </button>
                 {showFilterDropdown && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
                     <div className="p-2">
-                      <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100">
                         <input type="checkbox" className="mr-2" /> Gender
                       </label>
-                      <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100">
                         <input type="checkbox" className="mr-2" /> Experience
                       </label>
-                      <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100">
                         <input type="checkbox" className="mr-2" /> Fees
                       </label>
                     </div>
@@ -156,20 +156,20 @@ export default function FindDoctors() {
               <div className="relative">
                 <button
                   onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-500 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
                 >
                   Sort By: {sortBy}
                   <ChevronDown size={16} />
                 </button>
                 {showSortDropdown && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
                     <div className="p-2">
                       <button
                         onClick={() => {
                           setSortBy("Relevance");
                           setShowSortDropdown(false);
                         }}
-                        className="w-full text-left p-2 hover:bg-gray-50 rounded cursor-pointer"
+                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
                       >
                         Relevance
                       </button>
@@ -178,7 +178,7 @@ export default function FindDoctors() {
                           setSortBy("Rating");
                           setShowSortDropdown(false);
                         }}
-                        className="w-full text-left p-2 hover:bg-gray-50 rounded cursor-pointer"
+                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
                       >
                         Rating
                       </button>
@@ -187,7 +187,7 @@ export default function FindDoctors() {
                           setSortBy("Experience");
                           setShowSortDropdown(false);
                         }}
-                        className="w-full text-left p-2 hover:bg-gray-50 rounded cursor-pointer"
+                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
                       >
                         Experience
                       </button>
@@ -202,7 +202,7 @@ export default function FindDoctors() {
 
       {/* Doctors List Section */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-6">
           {doctors.length} doctors available
         </h2>
 
@@ -210,7 +210,7 @@ export default function FindDoctors() {
           {currentDoctors.map((doctor) => (
             <div
               key={doctor.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+              className="bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
             >
               <div className="p-6">
                 <div className="flex flex-col items-center md:items-start md:flex-row gap-6">

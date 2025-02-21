@@ -29,7 +29,7 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div className="flex items-center">
           <Link
-            to="."
+            to="/"
             className="text-2xl font-bold text-blue-600 dark:text-blue-400"
           >
             Med-Link
@@ -38,23 +38,23 @@ export default function Header() {
 
         <div className="hidden md:flex items-center space-x-8">
           <Link
-            to="."
+            to="/"
             className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
           >
             Home
           </Link>
           <Link
-            to="find"
+            to="/find"
             className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
           >
             Find Doctors
           </Link>
-          <a
-            href=""
+          <Link
+            to="/consult"
             className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
           >
             Online Consult
-          </a>
+          </Link>
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
@@ -75,7 +75,7 @@ export default function Header() {
         <div className="md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-gray-700 hover:text-blue-600 p-2 cursor-pointer"
+            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 p-2 cursor-pointer"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -83,29 +83,31 @@ export default function Header() {
       </nav>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg">
+        <div className="md:hidden bg-white dark:bg-gray-800 shadow-lg">
           <div className="px-4 pt-2 pb-3 space-y-2">
-            <a
-              href=""
-              className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50"
+            <Link
+              to="/"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
             >
               Home
-            </a>
-            <a
-              href=""
-              className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50"
+            </Link>
+            <Link
+              to="/find"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
             >
               Find Doctors
-            </a>
-            <a
-              href=""
-              className="block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50"
+            </Link>
+            <Link
+              to="/consult"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
             >
               Online Consult
-            </a>
-            <button className="w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-md cursor-pointer">
-              Login/Signup
-            </button>
+            </Link>
+            <Link to="/login">
+              <button className="w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-md cursor-pointer">
+                Login/Signup
+              </button>
+            </Link>
           </div>
         </div>
       )}

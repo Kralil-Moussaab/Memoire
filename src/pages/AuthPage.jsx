@@ -50,7 +50,7 @@ function LoginForm() {
       className="space-y-4"
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.2 }}
     >
       <h2 className="text-xl font-semibold">Login to Your Account</h2>
       <input
@@ -72,8 +72,8 @@ function LoginForm() {
         </a>
       </div>
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         className="w-full bg-blue-500 text-white py-2 rounded hover:cursor-pointer"
       >
         Login
@@ -88,7 +88,7 @@ function RegisterForm() {
       className="space-y-4"
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.2 }}
     >
       <span className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Join Med-Link</h2>
@@ -129,8 +129,8 @@ function RegisterForm() {
         <span>By signing up, I agree to terms</span>
       </div>
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         className="w-full bg-blue-500 text-white py-2 rounded hover:cursor-pointer"
       >
         Register
