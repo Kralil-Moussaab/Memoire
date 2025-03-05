@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, ChevronDown } from "lucide-react";
+import { Search, MapPin, ChevronDown, Filter } from "lucide-react";
 import { listDoctors } from "../services/api";
 
 export default function FindDoctors() {
@@ -11,25 +11,39 @@ export default function FindDoctors() {
   const [sortBy, setSortBy] = useState("Relevance");
   const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
+  const [genderFilter, setGenderFilter] = useState("");
+  const [activeFilters, setActiveFilters] = useState({});
 
   const specialties = [
-    "Dentist",
+    "dentist",
     "Cardiologist",
     "Neurologist",
     "Dermatologist",
-    "Pediatrician",
     "Orthopedic",
     "Gynecologist",
-    "ENT Specialist",
-    "General Practitioner",
+    "genralist",
+  ];
+
+  const genders = [
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
   ];
 
   useEffect(() => {
     fetchDoctors();
-  }, [currentPage, specialtyFilter]);
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchDoctors();
+    }
+  }, [specialtyFilter, genderFilter, activeFilters]);
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -38,46 +52,75 @@ export default function FindDoctors() {
         page: currentPage,
       };
 
-      if (searchTerm) {
-        params.name = searchTerm;
+      if (activeFilters.searchTerm) {
+        params.name = activeFilters.searchTerm;
       }
 
-      if (location) {
-        params.city = location;
+      if (activeFilters.location) {
+        params.city = activeFilters.location;
       }
 
-      if (specialtyFilter) {
-        params.speciality = specialtyFilter;
+      if (activeFilters.specialty) {
+        params.speciality = activeFilters.specialty;
+      }
+
+      if (activeFilters.gender) {
+        params.gender = activeFilters.gender;
       }
 
       const response = await listDoctors(params);
 
-      const formattedDoctors = response.data.map((doctor) => ({
-        id: doctor.id,
-        name: doctor.name,
-        specialty: doctor.speciality || "Specialist",
-        experience: "Experienced healthcare professional",
-        location: `${doctor.city || "Unknown"}, ${doctor.street || ""}`,
-        clinic: doctor.formations || "Medical Center",
-        rating: doctor.rating || 95,
-        patientStories: Math.floor(Math.random() * 100) + 10, 
-        image:
-          "https://imageio.forbes.com/specials-images/imageserve/626c7cf3616c1112ae834a2b/0x0.jpg?format=jpg&crop=1603,1603,x1533,y577,safe&height=416&width=416&fit=bounds",
-        availability: ["Today", "Tomorrow", "Next Week"],
-        typeConsultation: doctor.typeConsultation || "In-person",
-      }));
+      if (response && response.data) {
+        const formattedDoctors = response.data.map((doctor) => ({
+          id: doctor.id,
+          name: doctor.name || "Unknown Doctor",
+          specialty: doctor.speciality || getRandomSpecialty(),
+          experience: `${
+            Math.floor(Math.random() * 20) + 1
+          } years experience overall`,
+          location: `${doctor.city || "Unknown"}, ${doctor.street || ""}`,
+          clinic: doctor.formations || "Medical Center",
+          rating: doctor.rating || Math.floor(Math.random() * 20) + 80, 
+          patientStories: Math.floor(Math.random() * 100) + 10,
+          gender: doctor.gender || (Math.random() > 0.5 ? "male" : "female"),
+          image:
+            "https://imageio.forbes.com/specials-images/imageserve/626c7cf3616c1112ae834a2b/0x0.jpg?format=jpg&crop=1603,1603,x1533,y577,safe&height=416&width=416&fit=bounds",
+          availability: ["Today", "Tomorrow", "Next Week"],
+          typeConsultation:
+            doctor.typeConsultation ||
+            (Math.random() > 0.5 ? "In-person" : "Online"),
+        }));
 
-      setDoctors(formattedDoctors);
-      setTotalPages(response.meta?.last_page || 1);
-      setError(null);
+        setDoctors(formattedDoctors);
+
+        if (response.links && response.links.last) {
+          const lastPageUrl = new URL(response.links.last);
+          const lastPage = parseInt(
+            lastPageUrl.searchParams.get("page") || "1"
+          );
+          setTotalPages(lastPage);
+        } else if (response.meta && response.meta.last_page) {
+          setTotalPages(response.meta.last_page);
+        } else {
+          setTotalPages(Math.max(1, Math.ceil(response.data.length / 10)));
+        }
+
+        setError(null);
+      } else {
+        throw new Error("Invalid response format");
+      }
     } catch (err) {
       console.error("Failed to fetch doctors:", err);
       setError("Failed to load doctors. Please try again later.");
       setDoctors(generateMockDoctors());
-      setTotalPages(6);
+      setTotalPages(2);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getRandomSpecialty = () => {
+    return specialties[Math.floor(Math.random() * specialties.length)];
   };
 
   const generateMockDoctors = () => {
@@ -92,6 +135,7 @@ export default function FindDoctors() {
         clinic: "Smilescence Center for Advanced Dentistry +1",
         rating: 99,
         patientStories: 53,
+        gender: index % 2 === 0 ? "male" : "female",
         image:
           "https://imageio.forbes.com/specials-images/imageserve/626c7cf3616c1112ae834a2b/0x0.jpg?format=jpg&crop=1603,1603,x1533,y577,safe&height=416&width=416&fit=bounds",
         availability: ["Today", "Tomorrow", "Next Week"],
@@ -101,8 +145,12 @@ export default function FindDoctors() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setCurrentPage(1); 
-    fetchDoctors();
+
+    setActiveFilters({
+      ...activeFilters,
+      searchTerm: searchTerm,
+      location: location,
+    });
   };
 
   const handlePageChange = (pageNumber) => {
@@ -138,13 +186,49 @@ export default function FindDoctors() {
     setSortBy(sortOption);
     setShowSortDropdown(false);
 
+    const sortedDoctors = [...doctors];
+    if (sortOption === "Rating") {
+      sortedDoctors.sort((a, b) => b.rating - a.rating);
+    } else if (sortOption === "Experience") {
+      sortedDoctors.sort((a, b) => {
+        const expA = parseInt(a.experience.split(" ")[0]) || 0;
+        const expB = parseInt(b.experience.split(" ")[0]) || 0;
+        return expB - expA;
+      });
+    }
+    setDoctors(sortedDoctors);
   };
 
   const handleSpecialtyChange = (specialty) => {
     setSpecialtyFilter(specialty);
     setShowSpecialtyDropdown(false);
-    setCurrentPage(1); 
+
+    setActiveFilters({
+      ...activeFilters,
+      specialty: specialty,
+    });
   };
+
+  const handleGenderChange = (gender) => {
+    setGenderFilter(gender);
+    setShowGenderDropdown(false);
+
+    setActiveFilters({
+      ...activeFilters,
+      gender: gender,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setLocation("");
+    setSpecialtyFilter("");
+    setGenderFilter("");
+    setActiveFilters({});
+    setCurrentPage(1);
+  };
+
+  const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800">
@@ -190,7 +274,7 @@ export default function FindDoctors() {
             </form>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 items-center">
               <div className="relative">
                 <button
                   onClick={() =>
@@ -217,6 +301,42 @@ export default function FindDoctors() {
                           className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
                         >
                           {specialty}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowGenderDropdown(!showGenderDropdown)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
+                >
+                  Gender:{" "}
+                  {genderFilter
+                    ? genderFilter === "male"
+                      ? "Male"
+                      : "Female"
+                    : "All"}
+                  <ChevronDown size={16} />
+                </button>
+                {showGenderDropdown && (
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
+                    <div className="p-2">
+                      <button
+                        onClick={() => handleGenderChange("")}
+                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
+                      >
+                        All Genders
+                      </button>
+                      {genders.map((gender) => (
+                        <button
+                          key={gender.value}
+                          onClick={() => handleGenderChange(gender.value)}
+                          className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
+                        >
+                          {gender.label}
                         </button>
                       ))}
                     </div>
@@ -257,6 +377,15 @@ export default function FindDoctors() {
                   </div>
                 )}
               </div>
+
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={handleClearFilters}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors cursor-pointer"
+                >
+                  Clear Filters ({activeFilterCount})
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -316,13 +445,18 @@ export default function FindDoctors() {
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-4 mt-4 justify-center md:justify-start">
+                        <div className="flex items-center gap-4 mt-4 justify-center md:justify-start flex-wrap">
                           <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
                             {doctor.rating}%
                           </span>
                           <span className="text-gray-500 text-sm">
                             {doctor.patientStories} Patient Stories
                           </span>
+                          {doctor.gender && (
+                            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-medium">
+                              {doctor.gender === "male" ? "Male" : "Female"}
+                            </span>
+                          )}
                           {doctor.typeConsultation && (
                             <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
                               {doctor.typeConsultation}

@@ -72,7 +72,17 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-4">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+          >
+            {isDarkMode ? (
+              <Sun className="text-yellow-500" size={20} />
+            ) : (
+              <Moon className="text-gray-700 dark:text-gray-300" size={20} />
+            )}
+          </button>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-gray-700 dark:text-gray-300 hover:text-blue-600 p-2 cursor-pointer"
