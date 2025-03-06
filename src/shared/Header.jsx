@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Header() {
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +20,12 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsMenuOpen(false);
+    setShowProfileMenu(false);
+  };
 
   return (
     <header
@@ -65,11 +74,46 @@ export default function Header() {
               <Moon className="text-gray-700 dark:text-gray-300" size={20} />
             )}
           </button>
-          <Link to="/login">
-            <button className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2.5 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all cursor-pointer">
-              Login/Signup
-            </button>
-          </Link>
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-gray-700 flex items-center justify-center">
+                  <User size={20} />
+                </div>
+              </button>
+              
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={() => setShowProfileMenu(false)}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <User size={18} />
+                      <span>{user.name}</span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                  >
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login">
+              <button className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all cursor-pointer">
+                Login/Signup
+              </button>
+            </Link>
+          )}
         </div>
 
         <div className="md:hidden flex items-center gap-4">
@@ -98,26 +142,51 @@ export default function Header() {
             <Link
               to="/"
               className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+              onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/find"
               className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+              onClick={() => setIsMenuOpen(false)}
             >
               Find Doctors
             </Link>
             <Link
               to="/consult"
               className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+              onClick={() => setIsMenuOpen(false)}
             >
               Online Consult
             </Link>
-            <Link to="/login">
-              <button className="w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-md cursor-pointer">
-                Login/Signup
-              </button>
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <User size={20} />
+                    <span>{user.name}</span>
+                  </div>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2 px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                >
+                  <LogOut size={18} />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                <button className="w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-md cursor-pointer">
+                  Login/Signup
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       )}
