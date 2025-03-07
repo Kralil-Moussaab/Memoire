@@ -4,6 +4,7 @@ const api = axios.create({
   baseURL: "http://127.0.0.1:8000/api",
 });
 
+// Request interceptor
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -12,12 +13,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      localStorage.removeItem("userId");
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -29,7 +31,8 @@ export const login = async (email, password) => {
     const response = await api.post("/v1/users/login", { email, password });
     const { token, user } = response.data;
 
-    if (token && user) {
+    if (token) {
+      localStorage.setItem("token", token);
       return {
         success: true,
         data: { token, user },
@@ -48,12 +51,12 @@ export const login = async (email, password) => {
 export const logout = async () => {
   try {
     await api.post("/v1/users/logout");
+    localStorage.removeItem("token");
     return { success: true };
   } catch (error) {
     console.error("Logout error:", error);
-    return { success: false, error: "Logout failed" };
-  } finally {
     localStorage.removeItem("token");
+    return { success: false, error: "Logout failed" };
   }
 };
 
@@ -62,7 +65,8 @@ export const register = async (userData) => {
     const response = await api.post("/v1/users", userData);
     const { token, user } = response.data;
 
-    if (token && user) {
+    if (token) {
+      localStorage.setItem("token", token);
       return {
         success: true,
         data: { token, user },
@@ -80,8 +84,12 @@ export const register = async (userData) => {
   }
 };
 
+export const getCurrentUser = async (userId) => {
+  return api.get(`/v1/users/${userId}`);
+};
+
 export const updateUser = async (userData) => {
-  return api.put("v1/users/", userData);
+  return api.put("/v1/users/", userData);
 };
 
 export const listDoctors = async (params = {}) => {

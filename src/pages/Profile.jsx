@@ -7,7 +7,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: user?.phoneNumber || "",
+    phone: user?.phone_number || "",
   });
 
   const handleChange = (e) => {
@@ -37,7 +37,7 @@ export default function Profile() {
             </h1>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-blue-500 cursor-pointer text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
               {isEditing ? "Cancel" : "Edit Profile"}
             </button>
@@ -84,7 +84,7 @@ export default function Profile() {
               <div className="flex justify-end space-x-4">
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-6 py-2 cursor-pointer bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   Save Changes
                 </button>
@@ -113,7 +113,7 @@ export default function Profile() {
                   Phone
                 </h3>
                 <p className="mt-1 text-lg text-gray-900 dark:text-white">
-                  {user?.phoneNumber || "Not provided"}
+                  {user?.phone_number || "Not provided"}
                 </p>
               </div>
             </div>
@@ -122,7 +122,7 @@ export default function Profile() {
           <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={logout}
-              className="w-full sm:w-auto px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className="w-full sm:w-auto px-6 cursor-pointer py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
             >
               Logout
             </button>

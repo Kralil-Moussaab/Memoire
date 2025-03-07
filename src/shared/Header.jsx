@@ -6,7 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function Header() {
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -20,6 +20,23 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProfileMenu && !event.target.closest(".profile-menu-container")) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showProfileMenu]);
+
+  useEffect(() => {
+    if (!token) {
+      setShowProfileMenu(false);
+    }
+  }, [token]);
 
   const handleLogout = async () => {
     await logout();
@@ -74,8 +91,8 @@ export default function Header() {
               <Moon className="text-gray-700 dark:text-gray-300" size={20} />
             )}
           </button>
-          {user ? (
-            <div className="relative">
+          {token ? (
+            <div className="relative profile-menu-container">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
@@ -84,7 +101,7 @@ export default function Header() {
                   <User size={20} />
                 </div>
               </button>
-              
+
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2">
                   <Link
@@ -94,12 +111,12 @@ export default function Header() {
                   >
                     <div className="flex items-center space-x-2">
                       <User size={18} />
-                      <span>{user.name}</span>
+                      <span>{user?.name || "Profile"}</span>
                     </div>
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                    className="w-full cursor-pointer text-left px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
                   >
                     <LogOut size={18} />
                     <span>Logout</span>
@@ -160,7 +177,7 @@ export default function Header() {
             >
               Online Consult
             </Link>
-            {user ? (
+            {token ? (
               <>
                 <Link
                   to="/profile"
@@ -169,7 +186,7 @@ export default function Header() {
                 >
                   <div className="flex items-center space-x-2">
                     <User size={20} />
-                    <span>{user.name}</span>
+                    <span>{user?.name || "Profile"}</span>
                   </div>
                 </Link>
                 <button
