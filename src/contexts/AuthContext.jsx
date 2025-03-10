@@ -4,6 +4,7 @@ import {
   logout as apiLogout,
   register as apiRegister,
   updateUser as apiUpdateUser,
+  updatePassword as apiUpdatePassword,
   getCurrentUser,
 } from "../services/api";
 import { useNavigate } from "react-router-dom";
@@ -21,8 +22,11 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await getCurrentUser();
-      setUser(response.data);
-      return true;
+      if (response.data) {
+        setUser(response.data);
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error("Failed to fetch user:", error);
       if (error.response?.status === 401) {
@@ -45,7 +49,6 @@ export function AuthProvider({ children }) {
     initAuth();
   }, []);
 
-  // Re-fetch user data when token changes
   useEffect(() => {
     if (token) {
       fetchCurrentUser();
@@ -104,13 +107,31 @@ export function AuthProvider({ children }) {
 
   const updateProfile = async (userData) => {
     try {
-      const response = await apiUpdateUser(userData);
-      setUser(response.data.user);
-      return { success: true };
+      const response = await apiUpdateUser(user.id, userData);
+      if (response.data) {
+        setUser(response.data);
+        return { success: true };
+      }
+      return { success: false, error: "Failed to update profile" };
     } catch (error) {
       return {
         success: false,
         error: error.response?.data?.message || "Update failed",
+      };
+    }
+  };
+
+  const changePassword = async (passwordData) => {
+    try {
+      const response = await apiUpdatePassword(user.id, passwordData);
+      if (response.data) {
+        return { success: true };
+      }
+      return { success: false, error: "Failed to update password" };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Password update failed",
       };
     }
   };
@@ -134,6 +155,7 @@ export function AuthProvider({ children }) {
     logout,
     register,
     updateProfile,
+    changePassword,
     loading,
     isAuthenticated: !!token,
   };

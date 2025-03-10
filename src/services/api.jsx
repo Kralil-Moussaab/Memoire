@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: "http://localhost:8000/api",
 });
 
 // Request interceptor
@@ -19,7 +19,6 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      localStorage.removeItem("userId");
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -84,12 +83,34 @@ export const register = async (userData) => {
   }
 };
 
-export const getCurrentUser = async (userId) => {
-  return api.get(`/v1/users/${userId}`);
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.post("/v1/users/profile");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    throw error;
+  }
 };
 
-export const updateUser = async (userData) => {
-  return api.put("/v1/users/", userData);
+export const updateUser = async (userId, userData) => {
+  try {
+    const response = await api.put(`/v1/users/${userId}`, userData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};
+
+export const updatePassword = async (userId, passwordData) => {
+  try {
+    const response = await api.put(`/v1/users/${userId}/password`, passwordData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error;
+  }
 };
 
 export const listDoctors = async (params = {}) => {
@@ -117,7 +138,6 @@ export const listDoctors = async (params = {}) => {
     }
 
     const response = await api.get("/v1/doctors", { params: apiParams });
-    console.log("API Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching doctors:", error);
