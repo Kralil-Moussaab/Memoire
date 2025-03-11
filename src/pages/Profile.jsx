@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { Message } from "../shared/Message";
 
 export default function Profile() {
   const { user, updateProfile, changePassword, logout } = useAuth();
@@ -12,9 +13,9 @@ export default function Profile() {
     phoneNumber: "",
   });
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    old_password: "",
+    password: "",
+    password_confirmation: "",
   });
   const [showPasswords, setShowPasswords] = useState({
     current: false,
@@ -42,14 +43,7 @@ export default function Profile() {
       [e.target.name]: e.target.value,
     });
   };
-useEffect(() => {
-  if (success) {
-    const timer = setTimeout(() => {
-      setSuccess("");
-    }, 2000); 
-    return () => clearTimeout(timer); // Cleanup timer
-  }
-}, [success]);
+
   const handlePasswordChange = (e) => {
     setPasswordData({
       ...passwordData,
@@ -95,23 +89,20 @@ useEffect(() => {
     setError("");
     setSuccess("");
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
+    if (passwordData.password !== passwordData.password_confirmation) {
       setError("New passwords do not match");
       return;
     }
 
     try {
-      const result = await changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
+      const result = await changePassword(passwordData);
 
       if (result.success) {
         setSuccess("Password updated successfully!");
         setPasswordData({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
+          old_password: "",
+          password: "",
+          password_confirmation: "",
         });
       } else {
         setError(result.error);
@@ -126,7 +117,9 @@ useEffect(() => {
       <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
-            <p className="text-gray-600 dark:text-gray-400">Loading profile...</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Loading profile...
+            </p>
           </div>
         </div>
       </div>
@@ -178,19 +171,19 @@ useEffect(() => {
 
           <div className="p-6 md:p-8">
             {error && (
-              <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg">
-                {error}
-              </div>
+              <Message
+                type="error"
+                message={error}
+                onClose={() => setError("")}
+              />
             )}
+
             {success && (
-  <div className="fixed inset-0 flex items-center justify-center backdrop-blur z-50">
-    <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-        Success!
-      </h3>
-      <p className="text-gray-600 dark:text-gray-400">{success}</p>
-    </div>
-  </div>
+              <Message
+                type="success"
+                message={success}
+                onClose={() => setSuccess("")}
+              />
             )}
 
             {activeTab === "profile" && (
@@ -338,8 +331,8 @@ useEffect(() => {
                       />
                       <input
                         type={showPasswords.current ? "text" : "password"}
-                        name="currentPassword"
-                        value={passwordData.currentPassword}
+                        name="old_password"
+                        value={passwordData.old_password}
                         onChange={handlePasswordChange}
                         className="w-full pl-10 pr-10 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -367,8 +360,8 @@ useEffect(() => {
                       />
                       <input
                         type={showPasswords.new ? "text" : "password"}
-                        name="newPassword"
-                        value={passwordData.newPassword}
+                        name="password"
+                        value={passwordData.password}
                         onChange={handlePasswordChange}
                         className="w-full pl-10 pr-10 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -396,8 +389,8 @@ useEffect(() => {
                       />
                       <input
                         type={showPasswords.confirm ? "text" : "password"}
-                        name="confirmPassword"
-                        value={passwordData.confirmPassword}
+                        name="password_confirmation"
+                        value={passwordData.password_confirmation}
                         onChange={handlePasswordChange}
                         className="w-full pl-10 pr-10 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -440,7 +433,7 @@ useEffect(() => {
 
       {/* Password Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-40">
           <div className="bg-white dark:bg-gray-800 border-1 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Confirm Your Password

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, MapPin, ChevronDown, Filter } from "lucide-react";
 import { listDoctors } from "../services/api";
+import { Message } from "../shared/Message";
 
 export default function FindDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -17,6 +18,7 @@ export default function FindDoctors() {
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [genderFilter, setGenderFilter] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
+  const [success, setSuccess] = useState(null);
 
   const specialties = [
     "dentist",
@@ -80,7 +82,7 @@ export default function FindDoctors() {
           } years experience overall`,
           location: `${doctor.city || "Unknown"}, ${doctor.street || ""}`,
           clinic: doctor.formations || "Medical Center",
-          rating: doctor.rating || Math.floor(Math.random() * 20) + 80, 
+          rating: doctor.rating || Math.floor(Math.random() * 20) + 80,
           patientStories: Math.floor(Math.random() * 100) + 10,
           gender: doctor.gender || (Math.random() > 0.5 ? "male" : "female"),
           image:
@@ -231,7 +233,19 @@ export default function FindDoctors() {
   const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6">
+      {error && (
+        <Message type="error" message={error} onClose={() => setError("")} />
+      )}
+
+      {success && (
+        <Message
+          type="success"
+          message={success}
+          onClose={() => setSuccess("")}
+        />
+      )}
+
       {/* Search Section with Filter */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 py-8">
         <div className="max-w-7xl mx-auto px-4">

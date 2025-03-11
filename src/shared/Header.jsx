@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -10,6 +10,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,6 +45,10 @@ export default function Header() {
     setShowProfileMenu(false);
   };
 
+  const isActivePath = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -65,19 +70,31 @@ export default function Header() {
         <div className="hidden md:flex items-center space-x-8">
           <Link
             to="/"
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+            className={`font-medium ${
+              isActivePath("/")
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            }`}
           >
             Home
           </Link>
           <Link
             to="/find"
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+            className={`font-medium ${
+              isActivePath("/find")
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            }`}
           >
             Find Doctors
           </Link>
           <Link
             to="/consult"
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+            className={`font-medium ${
+              isActivePath("/consult")
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            }`}
           >
             Online Consult
           </Link>
@@ -95,7 +112,11 @@ export default function Header() {
             <div className="relative profile-menu-container">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                className={`flex items-center space-x-2 ${
+                  showProfileMenu
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                }`}
               >
                 <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-gray-700 flex items-center justify-center">
                   <User size={20} />
@@ -106,7 +127,11 @@ export default function Header() {
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                      isActivePath("/profile")
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
                     onClick={() => setShowProfileMenu(false)}
                   >
                     <div className="flex items-center space-x-2">
@@ -126,7 +151,9 @@ export default function Header() {
             </div>
           ) : (
             <Link to="/login">
-              <button className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all cursor-pointer">
+              <button className={`bg-blue-600 dark:bg-blue-500 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all cursor-pointer ${
+                isActivePath("/login") ? "bg-blue-700 dark:bg-blue-600" : ""
+              }`}>
                 Login/Signup
               </button>
             </Link>
@@ -146,7 +173,11 @@ export default function Header() {
           </button>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 p-2 cursor-pointer"
+            className={`p-2 cursor-pointer ${
+              isMenuOpen
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-300 hover:text-blue-600"
+            }`}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -158,21 +189,33 @@ export default function Header() {
           <div className="px-4 pt-2 pb-3 space-y-2">
             <Link
               to="/"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
+                isActivePath("/")
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                  : "text-gray-700 dark:text-gray-300"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/find"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
+                isActivePath("/find")
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                  : "text-gray-700 dark:text-gray-300"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Find Doctors
             </Link>
             <Link
               to="/consult"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
+                isActivePath("/consult")
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                  : "text-gray-700 dark:text-gray-300"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Online Consult
@@ -181,7 +224,11 @@ export default function Header() {
               <>
                 <Link
                   to="/profile"
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700"
+                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
+                    isActivePath("/profile")
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center space-x-2">
@@ -199,7 +246,9 @@ export default function Header() {
               </>
             ) : (
               <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                <button className="w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-md cursor-pointer">
+                <button className={`w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-md cursor-pointer ${
+                  isActivePath("/login") ? "bg-blue-700" : ""
+                }`}>
                   Login/Signup
                 </button>
               </Link>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import { Message } from "../shared/Message";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,9 +13,7 @@ export default function AuthPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 px-4 py-8">
       <div className="w-full max-w-md">
         {error && (
-          <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg">
-            {error}
-          </div>
+          <Message type="error" message={error} onClose={() => setError("")} />
         )}
         <div className="flex space-x-8 mb-4 justify-center">
           <button

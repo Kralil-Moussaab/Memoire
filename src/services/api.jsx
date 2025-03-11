@@ -96,20 +96,35 @@ export const getCurrentUser = async () => {
 export const updateUser = async (userId, userData) => {
   try {
     const response = await api.put(`/v1/users/${userId}`, userData);
-    return response.data;
+    return {
+      success: true,
+      data: response.data,
+    };
   } catch (error) {
-    console.error("Error updating user:", error);
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.message || "Update failed",
+    };
   }
 };
 
 export const updatePassword = async (userId, passwordData) => {
   try {
-    const response = await api.put(`/v1/users/${userId}/password`, passwordData);
-    return response.data;
+    const response = await api.patch(`/v1/users/update/password/${userId}`, {
+      old_password: passwordData.old_password,
+      password: passwordData.password,
+      password_confirmation: passwordData.password_confirmation,
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
   } catch (error) {
-    console.error("Error updating password:", error);
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.message || "Password update failed",
+    };
   }
 };
 

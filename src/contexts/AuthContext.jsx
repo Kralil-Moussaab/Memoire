@@ -108,11 +108,11 @@ export function AuthProvider({ children }) {
   const updateProfile = async (userData) => {
     try {
       const response = await apiUpdateUser(user.id, userData);
-      if (response.data) {
-        setUser(response.data);
+      if (response.success) {
+        setUser({ ...user, ...userData });
         return { success: true };
       }
-      return { success: false, error: "Failed to update profile" };
+      return { success: false, error: response.error };
     } catch (error) {
       return {
         success: false,
@@ -124,10 +124,10 @@ export function AuthProvider({ children }) {
   const changePassword = async (passwordData) => {
     try {
       const response = await apiUpdatePassword(user.id, passwordData);
-      if (response.data) {
+      if (response.success) {
         return { success: true };
       }
-      return { success: false, error: "Failed to update password" };
+      return { success: false, error: response.error };
     } catch (error) {
       return {
         success: false,
