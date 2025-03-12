@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, ChevronDown, Filter } from "lucide-react";
+import { Search, MapPin, ChevronDown } from "lucide-react";
 import { listDoctors } from "../services/api";
 import { Message } from "../shared/Message";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function FindDoctors() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,7 +17,7 @@ export default function FindDoctors() {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationSearch, setLocation] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [genderFilter, setGenderFilter] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
@@ -151,7 +154,7 @@ export default function FindDoctors() {
     setActiveFilters({
       ...activeFilters,
       searchTerm: searchTerm,
-      location: location,
+      location: locationSearch,
     });
   };
 
@@ -230,6 +233,10 @@ export default function FindDoctors() {
     setCurrentPage(1);
   };
 
+  const handleViewProfile = (doctorId) => {
+    navigate(`/doctor/${doctorId}?page=${currentPage}`);
+  };
+
   const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
 
   return (
@@ -261,7 +268,7 @@ export default function FindDoctors() {
                     type="text"
                     placeholder="Set your location"
                     className="w-full px-4 pl-10 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={location}
+                    value={locationSearch}
                     onChange={(e) => setLocation(e.target.value)}
                   />
                 </div>
@@ -479,7 +486,10 @@ export default function FindDoctors() {
                         </div>
                       </div>
                       <div className="flex flex-col gap-3 justify-center self-end">
-                        <button className="bg-blue-50 text-blue-500 cursor-pointer px-8 py-2.5 rounded-lg hover:bg-blue-100 transition-colors font-medium w-full sm:w-auto">
+                        <button
+                          onClick={() => handleViewProfile(doctor.id)}
+                          className="bg-blue-50 text-blue-500 cursor-pointer px-8 py-2.5 rounded-lg hover:bg-blue-100 transition-colors font-medium w-full sm:w-auto"
+                        >
                           See Profile
                         </button>
                         <button className="bg-blue-500 text-white cursor-pointer px-8 py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto">

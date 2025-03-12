@@ -7,6 +7,7 @@ import AuthPage from "./pages/AuthPage";
 import FindDoctors from "./pages/FindDoctors";
 import OnlineConsult from "./pages/OnlineConsult";
 import Profile from "./pages/Profile";
+import DoctorProfile from "./pages/DoctorProfile";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route index element={<Home />} />
               <Route path="login" element={<AuthPage />} />
               <Route path="find" element={<FindDoctors />} />
+              <Route path="doctor/:id" element={<DoctorProfile />} />
               <Route path="consult" element={<OnlineConsult />} />
               <Route path="profile" element={<Profile />} />
             </Route>

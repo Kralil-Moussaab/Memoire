@@ -224,7 +224,14 @@ export const listDoctors = async (params = {}) => {
 export const getDoctorById = async (id) => {
   try {
     const response = await api.get(`/v1/doctors/${id}`);
-    return response.data;
+    return {
+      success: true,
+      data: {
+        ...response.data.data,
+        image:
+          "https://imageio.forbes.com/specials-images/imageserve/626c7cf3616c1112ae834a2b/0x0.jpg?format=jpg&crop=1603,1603,x1533,y577,safe&height=416&width=416&fit=bounds",
+      },
+    };
   } catch (error) {
     console.error(`Error fetching doctor with id ${id}:`, error);
     throw error;
