@@ -95,12 +95,56 @@ export const getCurrentUser = async () => {
 
 export const updateUser = async (userId, userData) => {
   try {
-    const response = await api.put(`/v1/users/${userId}`, userData);
-    return {
-      success: true,
-      data: response.data,
-    };
+    const changedData = {};
+    const currentUser = await getCurrentUser();
+
+    Object.keys(userData).forEach((key) => {
+      if (userData[key] !== currentUser.data[key]) {
+        changedData[key] = userData[key];
+      }
+    });
+
+    if (userData.phoneNumber) {
+      changedData.phoneNumber = String(userData.phoneNumber).trim();
+    } else if (currentUser.data.phone_number) {
+      changedData.phoneNumber = String(currentUser.data.phoneNumber).trim();
+    }
+
+    if (Object.keys(changedData).length === 0) {
+      return {
+        success: false,
+        error: "No changes detected",
+      };
+    }
+
+    if (!changedData.password) {
+      delete changedData.password;
+    }
+
+    const response = await api.put(`/v1/users/${userId}`, changedData);
+
+    if (response.data.update) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    } else {
+      return {
+        success: false,
+        error: "Incorrect password",
+      };
+    }
   } catch (error) {
+    if (error.response?.data?.errors) {
+      const errorMessages = Object.entries(error.response.data.errors)
+        .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+        .join("\n");
+      return {
+        success: false,
+        error: errorMessages,
+      };
+    }
+
     return {
       success: false,
       error: error.response?.data?.message || "Update failed",
@@ -116,11 +160,28 @@ export const updatePassword = async (userId, passwordData) => {
       password_confirmation: passwordData.password_confirmation,
     });
 
+    if (response.data.update) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+
     return {
-      success: true,
-      data: response.data,
+      success: false,
+      error: "Current password is incorrect",
     };
   } catch (error) {
+    if (error.response?.data?.errors) {
+      const errorMessages = Object.entries(error.response.data.errors)
+        .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+        .join("\n");
+      return {
+        success: false,
+        error: errorMessages,
+      };
+    }
+
     return {
       success: false,
       error: error.response?.data?.message || "Password update failed",

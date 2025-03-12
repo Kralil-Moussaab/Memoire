@@ -109,7 +109,13 @@ export function AuthProvider({ children }) {
     try {
       const response = await apiUpdateUser(user.id, userData);
       if (response.success) {
-        setUser({ ...user, ...userData });
+        // Only update user state if the API update was successful
+        if (response.data.user) {
+          setUser((prevUser) => ({
+            ...prevUser,
+            ...response.data.user,
+          }));
+        }
         return { success: true };
       }
       return { success: false, error: response.error };
