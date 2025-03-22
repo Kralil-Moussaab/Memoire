@@ -18,6 +18,7 @@ import {
   Building2,
 } from "lucide-react";
 import { Message } from "../shared/Message";
+import defaultDoctorImage from "../assets/doc.png";
 
 export default function DoctorProfile() {
   const { id } = useParams();
@@ -50,6 +51,13 @@ export default function DoctorProfile() {
     const searchParams = new URLSearchParams(location.search);
     const page = searchParams.get("page");
     navigate(`/find${page ? `?page=${page}` : ""}`);
+  };
+
+  const getDoctorImage = (doctor) => {
+    if (doctor?.picture) {
+      return doctor.picture;
+    }
+    return defaultDoctorImage;
   };
 
   if (loading) {
@@ -134,11 +142,13 @@ export default function DoctorProfile() {
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 p-6">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                   <div className="relative">
-                    <img
-                      src={doctor.image || "https://via.placeholder.com/200"}
-                      alt={doctor.name}
-                      className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-lg"
-                    />
+                    <div className="profile-image-container">
+                      <img
+                        src={getDoctorImage(doctor)}
+                        alt={doctor?.name || "Doctor"}
+                        className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-lg"
+                      />
+                    </div>
                     <div className="absolute bottom-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
                   <div className="text-center md:text-left">

@@ -2,6 +2,9 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://localhost:8000/api",
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
 });
 
 // Request interceptor
@@ -43,6 +46,37 @@ export const login = async (email, password) => {
     return {
       success: false,
       error: error.response?.data?.message || "Login failed. Please try again.",
+    };
+  }
+};
+
+export const registerDoctor = async (doctorData) => {
+  try {
+    const response = await api.post("/v1/doctors", doctorData);
+    const { user } = response.data;
+    // const { token, user } = response.data;
+    // if (token) {
+    //   localStorage.setItem("token", token);
+    //   return {
+    //     success: true,
+    //     data: { token, user },
+    //   };
+    // }
+    // return { success: false, error: "Invalid response from server" };
+    return {
+      success: true,
+      data: { user },
+    };
+  } catch (error) {
+    console.error(
+      "Doctor registration error:",
+      error.response?.data || error.message
+    );
+    return {
+      success: false,
+      error:
+        error.response?.data?.message ||
+        "Registration failed. Please try again.",
     };
   }
 };

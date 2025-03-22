@@ -3,6 +3,7 @@ import { Search, MapPin, ChevronDown } from "lucide-react";
 import { listDoctors } from "../services/api";
 import { Message } from "../shared/Message";
 import { useNavigate, useLocation } from "react-router-dom";
+import defaultDoctorImage from "../assets/doc.png";
 
 export default function FindDoctors() {
   const navigate = useNavigate();
@@ -88,8 +89,7 @@ export default function FindDoctors() {
           rating: doctor.rating || Math.floor(Math.random() * 20) + 80,
           patientStories: Math.floor(Math.random() * 100) + 10,
           gender: doctor.gender || (Math.random() > 0.5 ? "male" : "female"),
-          image:
-            "https://imageio.forbes.com/specials-images/imageserve/626c7cf3616c1112ae834a2b/0x0.jpg?format=jpg&crop=1603,1603,x1533,y577,safe&height=416&width=416&fit=bounds",
+          picture:getDoctorImage(doctor),
           availability: ["Today", "Tomorrow", "Next Week"],
           typeConsultation:
             doctor.typeConsultation ||
@@ -238,6 +238,14 @@ export default function FindDoctors() {
   };
 
   const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
+
+
+  const getDoctorImage = (doctor) => {
+    if (doctor?.picture) {
+      return doctor.picture;
+    }
+    return defaultDoctorImage;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6">
@@ -439,8 +447,8 @@ export default function FindDoctors() {
                       <div className="flex-shrink-0 flex justify-center">
                         <div className="relative">
                           <img
-                            src={doctor.image}
-                            alt={doctor.name}
+                            src={getDoctorImage(doctor)}
+                            alt={doctor?.name || "Doctor"}
                             className="w-36 h-36 md:w-52 md:h-52 rounded-full object-cover border-4 border-white shadow-lg"
                           />
                           <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
