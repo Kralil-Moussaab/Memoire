@@ -9,9 +9,16 @@ import {
   Star,
   DollarSign,
   Activity,
+  User,
+  Mail,
+  Phone,
+  MapPin,
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import defaultDoctorImage from "../assets/doc.png";
 
 export default function DoctorDashboard() {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const stats = [
@@ -29,7 +36,7 @@ export default function DoctorDashboard() {
     },
     {
       title: "Rating",
-      value: "4.8",
+      value: user?.rating || "4.8",
       icon: <Star className="h-6 w-6 text-yellow-500" />,
       change: "+0.2",
     },
@@ -65,22 +72,53 @@ export default function DoctorDashboard() {
     },
   ];
 
+  const getDoctorImage = () => {
+    if (user?.picture) {
+      return user.picture;
+    }
+    return defaultDoctorImage;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Welcome back, Dr. Smith
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Here's what's happening with your practice today
-              </p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <img
+                  src={getDoctorImage()}
+                  alt={user?.name}
+                  className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+                <div className="absolute bottom-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Welcome back, Dr. {user?.name}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  {user?.speciality || "Specialist"}
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <Mail className="w-4 h-4 mr-1" />
+                    {user?.email}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <Phone className="w-4 h-4 mr-1" />
+                    {user?.phoneNumber}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {user?.city}, {user?.street}
+                  </div>
+                </div>
+              </div>
             </div>
             <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-              View Profile
+              Edit Profile
             </button>
           </div>
         </div>

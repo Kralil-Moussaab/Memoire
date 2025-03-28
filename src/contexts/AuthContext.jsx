@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import {
   login as apiLogin,
+  loginDoctor as apiLoginDoctor,
   logout as apiLogout,
   register as apiRegister,
+  registerDoctor as apiRegisterDoctor,
   updateUser as apiUpdateUser,
   updatePassword as apiUpdatePassword,
   getCurrentUser,
@@ -63,6 +65,7 @@ export function AuthProvider({ children }) {
 
   const clearAuth = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userType");
     setToken(null);
     setUser(null);
   };
@@ -74,6 +77,25 @@ export function AuthProvider({ children }) {
       if (result.success) {
         persistAuth(result.data.token, result.data.user);
         navigate("/");
+        return { success: true };
+      }
+
+      return { success: false, error: result.error };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || "Login failed",
+      };
+    }
+  };
+
+  const loginDoctor = async (email, password) => {
+    try {
+      const result = await apiLoginDoctor(email, password);
+
+      if (result.success) {
+        persistAuth(result.data.token, result.data.user);
+        navigate("/doctor/dashboard");
         return { success: true };
       }
 
@@ -105,11 +127,29 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const registerDoctor = async (doctorData) => {
+    try {
+      const result = await apiRegisterDoctor(doctorData);
+
+      if (result.success) {
+        persistAuth(result.data.token, result.data.user);
+        navigate("/doctor/dashboard");
+        return { success: true };
+      }
+
+      return { success: false, error: result.error };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || "Registration failed",
+      };
+    }
+  };
+
   const updateProfile = async (userData) => {
     try {
       const response = await apiUpdateUser(user.id, userData);
       if (response.success) {
-        // Only update user state if the API update was successful
         if (response.data.user) {
           setUser((prevUser) => ({
             ...prevUser,
@@ -158,8 +198,10 @@ export function AuthProvider({ children }) {
     user,
     token,
     login,
+    loginDoctor,
     logout,
     register,
+    registerDoctor,
     updateProfile,
     changePassword,
     loading,

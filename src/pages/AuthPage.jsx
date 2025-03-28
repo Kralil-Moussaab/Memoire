@@ -6,87 +6,7 @@ import { Message } from "../shared/Message";
 import { registerDoctor } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
-export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [isDoctor, setIsDoctor] = useState(false);
-  const [error, setError] = useState("");
-  const { login, register } = useAuth();
-  const navigate = useNavigate();
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 px-4 py-8">
-      <div className="w-full max-w-md">
-        {error && (
-          <Message type="error" message={error} onClose={() => setError("")} />
-        )}
-        <div className="flex space-x-8 mb-4 justify-center">
-          <button
-            className={`text-lg hover:cursor-pointer font-semibold ${
-              isLogin
-                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
-                : "text-gray-700 dark:text-gray-300"
-            }`}
-            onClick={() => {
-              setIsLogin(true);
-              setError("");
-              setIsDoctor(false);
-            }}
-          >
-            Login
-          </button>
-          <button
-            className={`text-lg hover:cursor-pointer font-semibold ${
-              !isLogin && !isDoctor
-                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
-                : "text-gray-700 dark:text-gray-300"
-            }`}
-            onClick={() => {
-              setIsLogin(false);
-              setError("");
-              setIsDoctor(false);
-            }}
-          >
-            Register
-          </button>
-          <button
-            className={`text-lg hover:cursor-pointer font-semibold ${
-              !isLogin && isDoctor
-                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
-                : "text-gray-700 dark:text-gray-300"
-            }`}
-            onClick={() => {
-              setIsLogin(false);
-              setError("");
-              setIsDoctor(true);
-            }}
-          >
-            Register as Doctor
-          </button>
-        </div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={isLogin ? "login" : isDoctor ? "doctor" : "register"}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg w-full"
-          >
-            {isLogin ? (
-              <LoginForm setError={setError} login={login} />
-            ) : isDoctor ? (
-              <DoctorRegisterForm setError={setError} navigate={navigate} />
-            ) : (
-              <RegisterForm setError={setError} register={register} />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-}
-
-function LoginForm({ setError, login }) {
+function LoginForm({ setError, login, loginDoctor, isDoctor }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -108,7 +28,10 @@ function LoginForm({ setError, login }) {
     setError("");
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = isDoctor 
+        ? await loginDoctor(formData.email, formData.password)
+        : await login(formData.email, formData.password);
+      
       if (!result.success) {
         setError(result.error);
       }
@@ -128,7 +51,7 @@ function LoginForm({ setError, login }) {
       transition={{ duration: 0.2 }}
     >
       <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-        Welcome Back
+        {isDoctor ? "Doctor Login" : "Welcome Back"}
       </h2>
       <div className="space-y-2">
         <input
@@ -173,6 +96,111 @@ function LoginForm({ setError, login }) {
         {loading ? "Signing in..." : "Sign In"}
       </motion.button>
     </motion.form>
+  );
+}
+
+export default function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [isDoctor, setIsDoctor] = useState(false);
+  const [error, setError] = useState("");
+  const { login, loginDoctor, register } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 px-4 py-8">
+      <div className="w-full max-w-md">
+        {error && (
+          <Message type="error" message={error} onClose={() => setError("")} />
+        )}
+        <div className="flex space-x-8 mb-4 justify-center">
+          <button
+            className={`text-lg hover:cursor-pointer font-semibold ${
+              isLogin && !isDoctor
+                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
+                : "text-gray-700 dark:text-gray-300"
+            }`}
+            onClick={() => {
+              setIsLogin(true);
+              setError("");
+              setIsDoctor(false);
+            }}
+          >
+            Login
+          </button>
+          <button
+            className={`text-lg hover:cursor-pointer font-semibold ${
+              isLogin && isDoctor
+                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
+                : "text-gray-700 dark:text-gray-300"
+            }`}
+            onClick={() => {
+              setIsLogin(true);
+              setError("");
+              setIsDoctor(true);
+            }}
+          >
+            Doctor Login
+          </button>
+          <button
+            className={`text-lg hover:cursor-pointer font-semibold ${
+              !isLogin && !isDoctor
+                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
+                : "text-gray-700 dark:text-gray-300"
+            }`}
+            onClick={() => {
+              setIsLogin(false);
+              setError("");
+              setIsDoctor(false);
+            }}
+          >
+            Register
+          </button>
+          <button
+            className={`text-lg hover:cursor-pointer font-semibold ${
+              !isLogin && isDoctor
+                ? "text-blue-500 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400"
+                : "text-gray-700 dark:text-gray-300"
+            }`}
+            onClick={() => {
+              setIsLogin(false);
+              setError("");
+              setIsDoctor(true);
+            }}
+          >
+            Register as Doctor
+          </button>
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${isLogin ? "login" : "register"}-${isDoctor ? "doctor" : "user"}`}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg w-full"
+          >
+            {isLogin ? (
+              <LoginForm 
+                setError={setError} 
+                login={login} 
+                loginDoctor={loginDoctor}
+                isDoctor={isDoctor}
+              />
+            ) : isDoctor ? (
+              <DoctorRegisterForm 
+                setError={setError} 
+                navigate={navigate}
+              />
+            ) : (
+              <RegisterForm 
+                setError={setError} 
+                register={register}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
@@ -327,13 +355,11 @@ function DoctorRegisterForm({ setError, navigate }) {
     password: "",
     password_confirmation: "",
     gender: "male",
-    phone_number: "",
+    phoneNumber: "",
     speciality: "",
-    formations: "",
-    type_consultation: "all",
+    typeConsultation: "all",
     city: "",
     street: "",
-    localisation: "",
     picture: null,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -376,7 +402,7 @@ function DoctorRegisterForm({ setError, navigate }) {
     try {
       const result = await registerDoctor(formData);
       if (result.success) {
-        navigate("/find");
+        navigate("/doctor/dashboard");
       } else {
         setError(result.error);
       }
@@ -542,8 +568,8 @@ function DoctorRegisterForm({ setError, navigate }) {
                 </label>
                 <input
                   type="tel"
-                  name="phone_number"
-                  value={formData.phone_number}
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
                   onChange={handleChange}
                   required
                   className="w-full p-2 md:p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -567,25 +593,11 @@ function DoctorRegisterForm({ setError, navigate }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Medical Education & Training
-              </label>
-              <textarea
-                name="formations"
-                value={formData.formations}
-                onChange={handleChange}
-                required
-                rows={3}
-                className="w-full p-2 md:p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="List your medical education, certifications, and training"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Consultation Type
               </label>
               <select
-                name="type_consultation"
-                value={formData.type_consultation}
+                name="typeConsultation"
+                value={formData.typeConsultation}
                 onChange={handleChange}
                 required
                 className="w-full p-2 md:p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -629,20 +641,6 @@ function DoctorRegisterForm({ setError, navigate }) {
                   placeholder="Street address"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Detailed Location
-              </label>
-              <textarea
-                name="localisation"
-                value={formData.localisation}
-                onChange={handleChange}
-                required
-                className="w-full p-2 md:p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Detailed clinic/hospital location"
-                rows={2}
-              />
             </div>
           </div>
         );
@@ -735,7 +733,7 @@ function DoctorRegisterForm({ setError, navigate }) {
             Previous
           </button>
         ) : (
-          <div></div> 
+          <div></div>
         )}
         <motion.button
           type="submit"

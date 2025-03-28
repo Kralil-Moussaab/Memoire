@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "http://localhost:8000/api",
   headers: {
-    "Content-Type": "multipart/form-data",
+    "Content-Type": "application/json",
   },
 });
 
@@ -13,6 +13,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Handle FormData separately
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+
   return config;
 });
 
@@ -22,6 +28,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
+      localStorage.removeItem("userType");
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -35,6 +42,7 @@ export const login = async (email, password) => {
 
     if (token) {
       localStorage.setItem("token", token);
+      localStorage.setItem("userType", "user");
       return {
         success: true,
         data: { token, user },
@@ -50,23 +58,54 @@ export const login = async (email, password) => {
   }
 };
 
+export const loginDoctor = async (email, password) => {
+  try {
+    const response = await api.post("/v1/doctors/login", { email, password });
+    const { token, doctor } = response.data;
+
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("userType", "doctor");
+      return {
+        success: true,
+        data: { token, user: { ...doctor, isDoctor: true } },
+      };
+    }
+    return { success: false, error: "Invalid response from server" };
+  } catch (error) {
+    console.error("Doctor login error:", error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Login failed. Please try again.",
+    };
+  }
+};
+
 export const registerDoctor = async (doctorData) => {
   try {
-    const response = await api.post("/v1/doctors", doctorData);
-    const { user } = response.data;
-    // const { token, user } = response.data;
-    // if (token) {
-    //   localStorage.setItem("token", token);
-    //   return {
-    //     success: true,
-    //     data: { token, user },
-    //   };
-    // }
-    // return { success: false, error: "Invalid response from server" };
-    return {
-      success: true,
-      data: { user },
-    };
+    const formData = new FormData();
+
+    // Add all doctor data to FormData
+    Object.keys(doctorData).forEach(key => {
+      if (key === 'picture' && doctorData[key]) {
+        formData.append('picture', doctorData[key]);
+      } else if (doctorData[key] !== null && doctorData[key] !== undefined) {
+        formData.append(key, doctorData[key].toString());
+      }
+    });
+
+    const response = await api.post("/v1/doctors", formData);
+    const { token, doctor } = response.data;
+    
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("userType", "doctor");
+      return {
+        success: true,
+        data: { token, user: { ...doctor, isDoctor: true } },
+      };
+    }
+    return { success: false, error: "Invalid response from server" };
   } catch (error) {
     console.error(
       "Doctor registration error:",
@@ -81,18 +120,6 @@ export const registerDoctor = async (doctorData) => {
   }
 };
 
-export const logout = async () => {
-  try {
-    await api.post("/v1/users/logout");
-    localStorage.removeItem("token");
-    return { success: true };
-  } catch (error) {
-    console.error("Logout error:", error);
-    localStorage.removeItem("token");
-    return { success: false, error: "Logout failed" };
-  }
-};
-
 export const register = async (userData) => {
   try {
     const response = await api.post("/v1/users", userData);
@@ -100,6 +127,7 @@ export const register = async (userData) => {
 
     if (token) {
       localStorage.setItem("token", token);
+      localStorage.setItem("userType", "user");
       return {
         success: true,
         data: { token, user },
@@ -117,10 +145,28 @@ export const register = async (userData) => {
   }
 };
 
+export const logout = async () => {
+  try {
+    const isDoctor = localStorage.getItem("userType") === "doctor";
+    await api.post(isDoctor ? "/v1/doctors/logout" : "/v1/users/logout");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userType");
+    return { success: true };
+  } catch (error) {
+    console.error("Logout error:", error);
+    localStorage.removeItem("token");
+    localStorage.removeItem("userType");
+    return { success: false, error: "Logout failed" };
+  }
+};
+
 export const getCurrentUser = async () => {
   try {
-    const response = await api.post("/v1/users/profile");
-    return response.data;
+    const isDoctor = localStorage.getItem("userType") === "doctor";
+    const response = await api.get(isDoctor ? "/v1/doctors/profile" : "/v1/users/profile");
+    return {
+      data: isDoctor ? { ...response.data, isDoctor: true } : response.data
+    };
   } catch (error) {
     console.error("Error fetching current user:", error);
     throw error;
@@ -129,6 +175,7 @@ export const getCurrentUser = async () => {
 
 export const updateUser = async (userId, userData) => {
   try {
+    const isDoctor = localStorage.getItem("userType") === "doctor";
     const changedData = {};
     const currentUser = await getCurrentUser();
 
@@ -155,7 +202,8 @@ export const updateUser = async (userId, userData) => {
       delete changedData.password;
     }
 
-    const response = await api.put(`/v1/users/${userId}`, changedData);
+    const endpoint = isDoctor ? `/v1/doctors/${userId}` : `/v1/users/${userId}`;
+    const response = await api.put(endpoint, changedData);
 
     if (response.data.update) {
       return {
@@ -188,7 +236,12 @@ export const updateUser = async (userId, userData) => {
 
 export const updatePassword = async (userId, passwordData) => {
   try {
-    const response = await api.patch(`/v1/users/update/password/${userId}`, {
+    const isDoctor = localStorage.getItem("userType") === "doctor";
+    const endpoint = isDoctor 
+      ? `/v1/doctors/update/password/${userId}` 
+      : `/v1/users/update/password/${userId}`;
+
+    const response = await api.patch(endpoint, {
       old_password: passwordData.old_password,
       password: passwordData.password,
       password_confirmation: passwordData.password_confirmation,
@@ -260,11 +313,7 @@ export const getDoctorById = async (id) => {
     const response = await api.get(`/v1/doctors/${id}`);
     return {
       success: true,
-      data: {
-        ...response.data.data,
-        image:
-          "https://imageio.forbes.com/specials-images/imageserve/626c7cf3616c1112ae834a2b/0x0.jpg?format=jpg&crop=1603,1603,x1533,y577,safe&height=416&width=416&fit=bounds",
-      },
+      data: response.data.data,
     };
   } catch (error) {
     console.error(`Error fetching doctor with id ${id}:`, error);
