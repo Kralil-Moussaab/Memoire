@@ -28,10 +28,10 @@ function LoginForm({ setError, login, loginDoctor, isDoctor }) {
     setError("");
 
     try {
-      const result = isDoctor 
+      const result = isDoctor
         ? await loginDoctor(formData.email, formData.password)
         : await login(formData.email, formData.password);
-      
+
       if (!result.success) {
         setError(result.error);
       }
@@ -172,7 +172,9 @@ export default function AuthPage() {
         </div>
         <AnimatePresence mode="wait">
           <motion.div
-            key={`${isLogin ? "login" : "register"}-${isDoctor ? "doctor" : "user"}`}
+            key={`${isLogin ? "login" : "register"}-${
+              isDoctor ? "doctor" : "user"
+            }`}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -180,22 +182,16 @@ export default function AuthPage() {
             className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg w-full"
           >
             {isLogin ? (
-              <LoginForm 
-                setError={setError} 
-                login={login} 
+              <LoginForm
+                setError={setError}
+                login={login}
                 loginDoctor={loginDoctor}
                 isDoctor={isDoctor}
               />
             ) : isDoctor ? (
-              <DoctorRegisterForm 
-                setError={setError} 
-                navigate={navigate}
-              />
+              <DoctorRegisterForm setError={setError} navigate={navigate} />
             ) : (
-              <RegisterForm 
-                setError={setError} 
-                register={register}
-              />
+              <RegisterForm setError={setError} register={register} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -581,15 +577,24 @@ function DoctorRegisterForm({ setError, navigate }) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Speciality
               </label>
-              <input
-                type="text"
+              <select
                 name="speciality"
                 value={formData.speciality}
                 onChange={handleChange}
                 required
                 className="w-full p-2 md:p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Cardiologist, Neurologist"
-              />
+              >
+                <option value="" disabled>
+                  Select a speciality
+                </option>
+                <option value="Dentist">Dentist</option>
+                <option value="Cardiologist">Cardiologist</option>
+                <option value="Neurologist">Neurologist</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Orthopedic">Orthopedic</option>
+                <option value="Gynecologist">Gynecologist</option>
+                <option value="Generalist">Generalist</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

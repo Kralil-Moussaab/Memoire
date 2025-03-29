@@ -11,7 +11,7 @@ export default function DoctorLayout() {
   }
 
   // Redirect to login if not authenticated or not a doctor
-  if (!user || !user.isDoctor) {
+  if (!user ) {
     return <Navigate to="/login" replace />;
   }
 

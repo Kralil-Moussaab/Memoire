@@ -86,9 +86,9 @@ export const registerDoctor = async (doctorData) => {
     const formData = new FormData();
 
     // Add all doctor data to FormData
-    Object.keys(doctorData).forEach(key => {
-      if (key === 'picture' && doctorData[key]) {
-        formData.append('picture', doctorData[key]);
+    Object.keys(doctorData).forEach((key) => {
+      if (key === "picture" && doctorData[key]) {
+        formData.append("picture", doctorData[key]);
       } else if (doctorData[key] !== null && doctorData[key] !== undefined) {
         formData.append(key, doctorData[key].toString());
       }
@@ -96,7 +96,7 @@ export const registerDoctor = async (doctorData) => {
 
     const response = await api.post("/v1/doctors", formData);
     const { token, doctor } = response.data;
-    
+
     if (token) {
       localStorage.setItem("token", token);
       localStorage.setItem("userType", "doctor");
@@ -163,10 +163,13 @@ export const logout = async () => {
 export const getCurrentUser = async () => {
   try {
     const isDoctor = localStorage.getItem("userType") === "doctor";
-    const response = await api.get(isDoctor ? "/v1/doctors/profile" : "/v1/users/profile");
-    return {
-      data: isDoctor ? { ...response.data, isDoctor: true } : response.data
-    };
+    const response = await api.post(
+      isDoctor ? "/v1/doctors/profile" : "/v1/users/profile"
+    );
+    return isDoctor ? { ...response.data, isDoctor: true } : response.data;
+    // return {
+    //   data: isDoctor ? { ...response.data, isDoctor: true } : response.data,
+    // };
   } catch (error) {
     console.error("Error fetching current user:", error);
     throw error;
@@ -237,8 +240,8 @@ export const updateUser = async (userId, userData) => {
 export const updatePassword = async (userId, passwordData) => {
   try {
     const isDoctor = localStorage.getItem("userType") === "doctor";
-    const endpoint = isDoctor 
-      ? `/v1/doctors/update/password/${userId}` 
+    const endpoint = isDoctor
+      ? `/v1/doctors/update/password/${userId}`
       : `/v1/users/update/password/${userId}`;
 
     const response = await api.patch(endpoint, {
