@@ -10,6 +10,9 @@ import Profile from "./pages/Profile";
 import DoctorProfile from "./pages/DoctorProfile";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import DoctorLayout from "./shared/DoctorLayout";
+import PatientsPage from "./pages/doctor/PatientsPage";
+import AppointmentsPage from "./pages/doctor/AppointmentsPage";
+import ProfilePage from "./pages/doctor/ProfilePage";
 
 function App() {
   return (
@@ -27,7 +30,9 @@ function App() {
             </Route>
             <Route path="/doctor" element={<DoctorLayout />}>
               <Route path="dashboard" element={<DoctorDashboard />} />
-              <Route path="profile" element={<Profile />} />
+              <Route path="patients" element={<PatientsPage />} />
+              <Route path="appointments" element={<AppointmentsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Routes>
         </AuthProvider>
