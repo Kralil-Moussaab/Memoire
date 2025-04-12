@@ -324,4 +324,37 @@ export const getDoctorById = async (id) => {
   }
 };
 
+export const addAppointmentSlots = async (doctorId, slots) => {
+  try {
+    const response = await api.post("/v1/appointments", {
+      doctorId: doctorId,
+      date: slots.date,
+      time: slots.timeSlots,
+    });
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error adding appointment slots:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to add appointment slots",
+    };
+  }
+};
+
+export const getAppointmentSlotsById = async (id) => {
+  try {
+    const response = await api.get(`/v1/appointments/doctor/Scheduled/${id}`);
+    return {
+      success: true,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching doctor with id ${id}:`, error);
+    throw error;
+  }
+};
+
 export default api;

@@ -9,6 +9,8 @@ import {
   Lock,
   Eye,
   EyeOff,
+  Loader,
+  CheckCircle,
 } from "lucide-react";
 import defaultDoctorImage from "../../assets/doc.png";
 import { Message } from "../../shared/Message";
@@ -23,7 +25,6 @@ export default function ProfilePage() {
     speciality: user?.speciality || "",
     city: user?.city || "",
     street: user?.street || "",
-    workingHours: user?.workingHours || "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -42,6 +43,8 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -52,7 +55,6 @@ export default function ProfilePage() {
         speciality: user?.speciality || "",
         city: user?.city || "",
         street: user?.street || "",
-        workingHours: user?.workingHours || "",
       });
     }
   }, [user]);
@@ -65,6 +67,7 @@ export default function ProfilePage() {
   const handleConfirmSubmit = async () => {
     setError("");
     setSuccess("");
+    setLoading(true);
     try {
       const result = await updateProfile({
         name: personalInfo.name,
@@ -73,7 +76,6 @@ export default function ProfilePage() {
         speciality: personalInfo.speciality,
         city: personalInfo.city,
         street: personalInfo.street,
-        workingHours: personalInfo.workingHours,
         password: confirmPassword,
       });
 
@@ -81,11 +83,14 @@ export default function ProfilePage() {
         setSuccess("Profile updated successfully!");
         setShowConfirmModal(false);
         setConfirmPassword("");
+        setHasChanges(false);
       } else {
         setError(result.error);
       }
     } catch (error) {
       setError("Failed to update profile. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,9 +105,11 @@ export default function ProfilePage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     if (passwordData.password !== passwordData.password_confirmation) {
       setError("New passwords do not match");
+      setLoading(false);
       return;
     }
 
@@ -121,6 +128,8 @@ export default function ProfilePage() {
       }
     } catch (error) {
       setError("Failed to update password. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,6 +145,14 @@ export default function ProfilePage() {
       return user.picture;
     }
     return defaultDoctorImage;
+  };
+
+  const handlePersonalInfoChange = (e) => {
+    setPersonalInfo({
+      ...personalInfo,
+      [e.target.name]: e.target.value,
+    });
+    setHasChanges(true);
   };
 
   if (!user) {
@@ -176,7 +193,6 @@ export default function ProfilePage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Summary Card */}
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
             <div className="flex flex-col items-center">
@@ -217,10 +233,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-            {/* Tabs */}
             <div className="flex border-b border-gray-200 dark:border-gray-700">
               <button
                 className={`px-6 py-3 ${
@@ -254,13 +268,9 @@ export default function ProfilePage() {
                       </label>
                       <input
                         type="text"
+                        name="name"
                         value={personalInfo.name}
-                        onChange={(e) =>
-                          setPersonalInfo({
-                            ...personalInfo,
-                            name: e.target.value,
-                          })
-                        }
+                        onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -270,13 +280,9 @@ export default function ProfilePage() {
                       </label>
                       <input
                         type="email"
+                        name="email"
                         value={personalInfo.email}
-                        onChange={(e) =>
-                          setPersonalInfo({
-                            ...personalInfo,
-                            email: e.target.value,
-                          })
-                        }
+                        onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -286,13 +292,9 @@ export default function ProfilePage() {
                       </label>
                       <input
                         type="tel"
+                        name="phone"
                         value={personalInfo.phone}
-                        onChange={(e) =>
-                          setPersonalInfo({
-                            ...personalInfo,
-                            phone: e.target.value,
-                          })
-                        }
+                        onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -302,13 +304,9 @@ export default function ProfilePage() {
                       </label>
                       <input
                         type="text"
+                        name="speciality"
                         value={personalInfo.speciality}
-                        onChange={(e) =>
-                          setPersonalInfo({
-                            ...personalInfo,
-                            speciality: e.target.value,
-                          })
-                        }
+                        onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -318,13 +316,9 @@ export default function ProfilePage() {
                       </label>
                       <input
                         type="text"
+                        name="city"
                         value={personalInfo.city}
-                        onChange={(e) =>
-                          setPersonalInfo({
-                            ...personalInfo,
-                            city: e.target.value,
-                          })
-                        }
+                        onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -334,13 +328,9 @@ export default function ProfilePage() {
                       </label>
                       <input
                         type="text"
+                        name="street"
                         value={personalInfo.street}
-                        onChange={(e) =>
-                          setPersonalInfo({
-                            ...personalInfo,
-                            street: e.target.value,
-                          })
-                        }
+                        onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -349,10 +339,24 @@ export default function ProfilePage() {
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
+                      disabled={!hasChanges || loading}
+                      className={`px-6 py-2 rounded-lg flex items-center transition-colors ${
+                        hasChanges
+                          ? "bg-blue-500 hover:bg-blue-600 text-white"
+                          : "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                      }`}
                     >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
+                      {loading ? (
+                        <>
+                          <Loader className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Changes
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
@@ -441,25 +445,31 @@ export default function ProfilePage() {
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
+                      className={`px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={loading}
                     >
-                      <Save className="w-4 h-4 mr-2" />
+                      {loading ? (
+                        <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></span>
+                      ) : (
+                        <Save className="w-4 h-4 mr-2" />
+                      )}
                       Update Password
                     </button>
                   </div>
                 </form>
               )}
-
             </div>
           </div>
         </div>
       </div>
 
-      {/* Password Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-40">
           <div className="bg-white dark:bg-gray-800 border-1 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Lock className="w-5 h-5 mr-2 text-blue-500" />
               Confirm Your Password
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -503,9 +513,20 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={handleConfirmSubmit}
-                className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
+                disabled={!confirmPassword || loading}
               >
-                Confirm Changes
+                {loading ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Confirm Changes
+                  </>
+                )}
               </button>
             </div>
           </div>

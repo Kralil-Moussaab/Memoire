@@ -1,26 +1,5 @@
-// import { Navigate, Outlet } from "react-router-dom";
-// import { useAuth } from "../contexts/AuthContext";
-
-// export default function DoctorLayout() {
-//   const { user, loading } = useAuth();
-
-//   if (loading) {
-//     return null;
-//   }
-
-//   if (!user) {
-//     return <Navigate to="/login" replace />;
-//   }
-
-//   return (
-//     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-//       <Outlet />
-//     </div>
-//   );
-// }
-import { useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import {
   ChevronRight,
   ChevronLeft,
@@ -31,7 +10,7 @@ import {
   HelpCircle,
   LogOut,
   Search,
-  Bell
+  Bell,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import defaultDoctorImage from "../assets/doc.png";
@@ -46,23 +25,33 @@ const sidebarLinks = [
 export default function DoctorLayout() {
   const { user, logout, loading } = useAuth();
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (loading) {
-    return null;
-  }
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
-  const getDoctorImage = () => {
-    if (user?.picture) {
-      return user.picture;
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (windowWidth < 768) {
+      setSidebarCollapsed(true);
+    } else {
+      setSidebarCollapsed(false);
     }
-    return defaultDoctorImage;
-  };
+  }, [windowWidth]);
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+
+  const getDoctorImage = () => user?.picture || defaultDoctorImage;
 
   const handleLogout = async () => {
     await logout();
@@ -71,7 +60,6 @@ export default function DoctorLayout() {
 
   return (
     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-      {/* Sidebar */}
       <aside
         className={`${
           isSidebarCollapsed ? "w-20" : "w-64"
@@ -95,7 +83,7 @@ export default function DoctorLayout() {
           </button>
         </div>
 
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 flex flex-col h-full">
           <div className="flex items-center mb-8">
             <img
               src={getDoctorImage()}
@@ -116,7 +104,7 @@ export default function DoctorLayout() {
             )}
           </div>
 
-          <nav className="flex flex-col">
+          <nav className="flex flex-col flex-grow">
               {sidebarLinks.map((link) => (
               <Link
                 key={link.path}
@@ -133,8 +121,8 @@ export default function DoctorLayout() {
                 {!isSidebarCollapsed && <span>{link.label}</span>}
               </Link>
             ))}
-          
-            <div className="pt-4  mt-4 border-t border-gray-200 dark:border-gray-700">
+            
+            <div className="pt-3 mt-30 border-t border-gray-200 dark:border-gray-700">
               <Link
                 to="/doctor/help"
                 className="flex items-center space-x-3 text-gray-700 dark:text-gray-300 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -146,7 +134,7 @@ export default function DoctorLayout() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center space-x-3 text-red-500 p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="w-full flex cursor-pointer items-center space-x-3 text-red-500 p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <LogOut
                   className={`h-6 w-6 ${isSidebarCollapsed ? "mx-auto" : ""}`}
@@ -158,13 +146,11 @@ export default function DoctorLayout() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <div
         className={`flex-1 ${
           isSidebarCollapsed ? "ml-20" : "ml-64"
         } transition-all duration-300 ease-in-out`}
       >
-        {/* Top Navigation */}
         <header className="h-20 sticky top-0 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-between px-6 z-40">
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -176,7 +162,6 @@ export default function DoctorLayout() {
               />
             </div>
           </div>
-
           <div className="flex items-center space-x-4">
             <button className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none">
               <Bell className="h-6 w-6" />
@@ -184,8 +169,6 @@ export default function DoctorLayout() {
             </button>
           </div>
         </header>
-        
-        {/* Main Content - Outlet for nested routes */}
         <Outlet />
       </div>
     </div>

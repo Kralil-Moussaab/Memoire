@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { getDoctorById } from "../services/api";
+import { getDoctorById, getAppointmentSlotsById } from "../services/api";
 import {
   ArrowLeft,
   MapPin,
@@ -28,23 +28,32 @@ export default function DoctorProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [appointmentSlots, setAppointmentSlots] = useState([]);
 
   useEffect(() => {
-    const fetchDoctor = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getDoctorById(id);
-        if (response && response.data) {
-          setDoctor(response.data);
+        const [doctorResponse, slotsResponse] = await Promise.all([
+          getDoctorById(id),
+          getAppointmentSlotsById(id),
+        ]);
+
+        if (doctorResponse && doctorResponse.data) {
+          setDoctor(doctorResponse.data);
+        }
+
+        if (slotsResponse && slotsResponse.data) {
+          setAppointmentSlots(slotsResponse.data);
         }
       } catch (err) {
-        console.error("Failed to fetch doctor:", err);
-        setError("Failed to load doctor information. Please try again later.");
+        console.error("Failed to fetch data:", err);
+        setError("Failed to load information. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDoctor();
+    fetchData();
   }, [id]);
 
   const handleBack = () => {
@@ -58,6 +67,17 @@ export default function DoctorProfile() {
       return doctor.picture;
     }
     return defaultDoctorImage;
+  };
+
+  const groupSlotsByDate = (slots) => {
+    return slots.reduce((grouped, slot) => {
+      const date = slot.date;
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(slot.time);
+      return grouped;
+    }, {});
   };
 
   if (loading) {
@@ -117,11 +137,6 @@ export default function DoctorProfile() {
     },
   ];
 
-  const availableSlots = [
-    { date: "Today", times: ["09:00 AM", "11:30 AM", "02:00 PM"] },
-    { date: "Tomorrow", times: ["10:00 AM", "01:30 PM", "04:00 PM"] },
-    { date: "Wed, 20 Mar", times: ["09:30 AM", "12:00 PM", "03:30 PM"] },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4">
@@ -135,9 +150,7 @@ export default function DoctorProfile() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Profile Section */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Profile Card */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 p-6">
                 <div className="flex flex-col md:flex-row items-center gap-6">
@@ -175,7 +188,6 @@ export default function DoctorProfile() {
                 </div>
               </div>
 
-              {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gray-50 dark:bg-gray-800/50">
                 {stats.map((stat, index) => (
                   <div
@@ -193,7 +205,6 @@ export default function DoctorProfile() {
                 ))}
               </div>
 
-              {/* Tabs */}
               <div className="border-t border-gray-200 dark:border-gray-700">
                 <div className="flex overflow-x-auto">
                   <button
@@ -229,7 +240,6 @@ export default function DoctorProfile() {
                 </div>
               </div>
 
-              {/* Tab Content */}
               <div className="p-6">
                 {activeTab === "overview" && (
                   <div className="space-y-6">
@@ -341,39 +351,46 @@ export default function DoctorProfile() {
             </div>
           </div>
 
-          {/* Booking Section */}
           <div className="space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                 Book Appointment
               </h2>
               <div className="space-y-6">
-                {availableSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                  >
-                    <div className="flex items-center mb-3">
-                      <Calendar className="w-5 h-5 mr-2 text-blue-500" />
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {slot.date}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {slot.times.map((time, timeIndex) => (
-                        <button
-                          key={timeIndex}
-                          className="flex items-center justify-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                        >
-                          <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">
-                            {time}
+                {appointmentSlots.length > 0 ? (
+                  Object.entries(groupSlotsByDate(appointmentSlots)).map(
+                    ([date, times], index) => (
+                      <div
+                        key={index}
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                      >
+                        <div className="flex items-center mb-3">
+                          <Calendar className="w-5 h-5 mr-2 text-blue-500" />
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {date}
                           </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {times.map((time, timeIndex) => (
+                            <button
+                              key={timeIndex}
+                              className="flex items-center justify-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                            >
+                              <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">
+                                {time}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )
+                ) : (
+                  <p className="text-center text-gray-500 dark:text-gray-400">
+                    No appointment slots available
+                  </p>
+                )}
                 <button className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer font-medium">
                   Book Now
                 </button>
