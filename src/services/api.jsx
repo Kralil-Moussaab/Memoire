@@ -357,4 +357,22 @@ export const getAppointmentSlotsById = async (id) => {
   }
 };
 
+export const approveAppointment = async (id, userId) => {
+  try {
+    const response = await api.patch(`/v1/appointments/scheduled/${id}`, {
+      userId,
+    });
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error approving appointment:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to approve appointment",
+    };
+  }
+};
+
 export default api;
