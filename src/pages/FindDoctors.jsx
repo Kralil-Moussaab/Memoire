@@ -89,7 +89,7 @@ export default function FindDoctors() {
           rating: doctor.rating || Math.floor(Math.random() * 20) + 80,
           patientStories: Math.floor(Math.random() * 100) + 10,
           gender: doctor.gender || (Math.random() > 0.5 ? "male" : "female"),
-          picture:getDoctorImage(doctor),
+          picture: getDoctorImage(doctor),
           availability: ["Today", "Tomorrow", "Next Week"],
           typeConsultation:
             doctor.typeConsultation ||
@@ -239,7 +239,6 @@ export default function FindDoctors() {
 
   const activeFilterCount = Object.values(activeFilters).filter(Boolean).length;
 
-
   const getDoctorImage = (doctor) => {
     if (doctor?.picture) {
       return doctor.picture;
@@ -266,21 +265,8 @@ export default function FindDoctors() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
             <form onSubmit={handleSearch} className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="relative">
-                  <MapPin
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Set your location"
-                    className="w-full px-4 pl-10 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={locationSearch}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                </div>
-                <div className="relative">
+              <div className="flex flex-col sm:flex-row">
+                <div className="relative flex-1">
                   <Search
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                     size={20}
@@ -288,14 +274,14 @@ export default function FindDoctors() {
                   <input
                     type="text"
                     placeholder="Search doctor by name"
-                    className="w-full px-4 pl-10 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 pl-10 py-2 sm:py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-8 cursor-pointer py-3 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors font-medium"
+                  className="mt-2 sm:mt-0 sm:ml-2 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors font-medium text-sm w-full sm:w-24"
                 >
                   Search
                 </button>
@@ -303,7 +289,7 @@ export default function FindDoctors() {
             </form>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
               <div className="relative">
                 <button
                   onClick={() =>
@@ -442,21 +428,21 @@ export default function FindDoctors() {
                   key={doctor.id}
                   className="bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
                 >
-                  <div className="p-6">
-                    <div className="flex flex-col items-center md:items-start md:flex-row gap-6">
-                      <div className="flex-shrink-0 flex justify-center">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+                      <div className="flex-shrink-0">
                         <div className="relative">
                           <img
                             src={getDoctorImage(doctor)}
                             alt={doctor?.name || "Doctor"}
-                            className="w-36 h-36 md:w-52 md:h-52 rounded-full object-cover border-4 border-white shadow-lg"
+                            className="w-24 h-24 sm:w-36 sm:h-36 md:w-52 md:h-52 rounded-full object-cover border-4 border-white shadow-lg"
                           />
                           <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
                         </div>
                       </div>
 
-                      <div className="flex-grow text-center md:text-left">
-                        <h3 className="text-2xl font-semibold text-blue-500">
+                      <div className="flex-grow text-center sm:text-left">
+                        <h3 className="text-xl sm:text-2xl font-semibold text-blue-500">
                           {doctor.name}
                         </h3>
                         <p className="text-gray-600 mt-1">{doctor.specialty}</p>
@@ -465,7 +451,7 @@ export default function FindDoctors() {
                         </p>
 
                         <div className="mt-3">
-                          <p className="text-gray-600 flex items-center gap-1 justify-center md:justify-start">
+                          <p className="text-gray-600 flex items-center gap-1 justify-center sm:justify-start">
                             <MapPin size={16} className="text-gray-400" />
                             {doctor.location}
                           </p>
@@ -474,7 +460,7 @@ export default function FindDoctors() {
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-4 mt-4 justify-center md:justify-start flex-wrap">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4 justify-center sm:justify-start">
                           <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
                             {doctor.rating}%
                           </span>
@@ -493,14 +479,14 @@ export default function FindDoctors() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-3 justify-center self-end">
+                      <div className="flex flex-col self-end gap-3 w-full sm:w-auto">
                         <button
                           onClick={() => handleViewProfile(doctor.id)}
-                          className="bg-blue-50 text-blue-500 cursor-pointer px-8 py-2.5 rounded-lg hover:bg-blue-100 transition-colors font-medium w-full sm:w-auto"
+                          className="bg-blue-50 text-blue-500 cursor-pointer px-4 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:bg-blue-100 transition-colors font-medium w-full sm:w-auto"
                         >
                           See Profile
                         </button>
-                        <button className="bg-blue-500 text-white cursor-pointer px-8 py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto">
+                        <button className="bg-blue-500 text-white cursor-pointer px-4 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto">
                           Book Consultation
                         </button>
                       </div>

@@ -10,53 +10,23 @@ import {
   Plus,
   X,
   Trash2,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { Message } from "../../shared/Message";
 import {
   addAppointmentSlots,
   getAppointmentSlotsById,
+  getApproveAppointment,
 } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function AppointmentsPage() {
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      patientName: "Sarah Johnson",
-      date: "2024-02-20",
-      time: "09:00 AM",
-      type: "Video Call",
-      status: "Upcoming",
-      image: "https://randomuser.me/api/portraits/women/1.jpg",
-      symptoms: "Headache and fever",
-      duration: "30 mins",
-    },
-    {
-      id: 2,
-      patientName: "Michael Brown",
-      date: "2024-02-20",
-      time: "10:30 AM",
-      type: "In Person",
-      status: "Completed",
-      image: "https://randomuser.me/api/portraits/men/2.jpg",
-      symptoms: "Regular checkup",
-      duration: "45 mins",
-    },
-    {
-      id: 3,
-      patientName: "Emily Davis",
-      date: "2024-02-20",
-      time: "02:00 PM",
-      type: "Chat",
-      status: "Upcoming",
-      image: "https://randomuser.me/api/portraits/women/3.jpg",
-      symptoms: "Back pain",
-      duration: "30 mins",
-    },
-  ]);
-
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [appointmentData, setAppointmentData] = useState({
     date: "",
@@ -67,6 +37,58 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
+
+  useEffect(() => {
+    const fetchApprovedAppointments = async () => {
+      try {
+        setLoadingAppointments(true);
+        const response = await getApproveAppointment();
+        console.log("Full API Response:", response);
+
+        if (response.success && response.data) {
+          console.log("Response data:", response.data);
+
+          if (
+            !response.data.appointments ||
+            !Array.isArray(response.data.appointments)
+          ) {
+            console.error("Invalid appointments data format");
+            setError("Invalid appointments data format");
+            return;
+          }
+
+          const formattedAppointments = response.data.appointments.map(
+            (appointment) => {
+              console.log("Processing appointment:", appointment);
+              return {
+                id: appointment.id,
+                patientName: appointment.user?.name || "Unknown Patient",
+                date: appointment.date,
+                time: appointment.time,
+                status: "Upcoming",
+                email: appointment.user?.email || "No email provided",
+                phoneNumber:
+                  appointment.user?.phone_number || "No phone provided",
+              };
+            }
+          );
+
+          console.log("Formatted appointments:", formattedAppointments);
+          setAppointments(formattedAppointments);
+        } else {
+          console.error("API Error Response:", response);
+          setError(response.error || "Failed to load appointments");
+        }
+      } catch (err) {
+        console.error("Error in fetchApprovedAppointments:", err);
+        setError("Failed to load appointments. Please try again later.");
+      } finally {
+        setLoadingAppointments(false);
+      }
+    };
+
+    fetchApprovedAppointments();
+  }, []);
 
   useEffect(() => {
     const fetchAvailableSlots = async () => {
@@ -92,6 +114,19 @@ export default function AppointmentsPage() {
   const filterAppointments = (status) => {
     setActiveFilter(status);
   };
+
+  const filteredAppointments = appointments.filter((appointment) => {
+    const matchesFilter =
+      activeFilter === "all" ||
+      appointment.status.toLowerCase() === activeFilter.toLowerCase();
+    const matchesSearch =
+      appointment.patientName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      appointment.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appointment.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   const handleAddTimeSlot = () => {
     setAppointmentData({
@@ -191,15 +226,6 @@ export default function AppointmentsPage() {
         />
       )}
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Appointments
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Manage your appointments and schedule
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
@@ -235,7 +261,7 @@ export default function AppointmentsPage() {
                         <div className="flex items-center">
                           <Calendar className="w-5 h-5 text-blue-500 mr-2" />
                           <span className="font-medium text-gray-900 dark:text-white">
-                            {date}
+                            {new Date(date).toLocaleDateString("en-GB")}
                           </span>
                         </div>
                         <button
@@ -276,36 +302,38 @@ export default function AppointmentsPage() {
                 <input
                   type="text"
                   placeholder="Search appointments..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => filterAppointments("all")}
-                  className={`px-4 py-2 rounded-lg ${
+                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
                     activeFilter === "all"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => filterAppointments("upcoming")}
-                  className={`px-4 py-2 rounded-lg ${
+                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
                     activeFilter === "upcoming"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   }`}
                 >
                   Upcoming
                 </button>
                 <button
                   onClick={() => filterAppointments("completed")}
-                  className={`px-4 py-2 rounded-lg ${
+                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
                     activeFilter === "completed"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      ? "bg-gray-500 text-white shadow-md"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   }`}
                 >
                   Completed
@@ -315,66 +343,89 @@ export default function AppointmentsPage() {
           </div>
 
           <div className="space-y-4">
-            {appointments.map((appointment) => (
-              <div
-                key={appointment.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
-              >
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={appointment.image}
-                      alt={appointment.patientName}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {appointment.patientName}
-                      </h3>
-                      <div className="flex flex-wrap gap-4 mt-2">
-                        <div className="flex items-center text-gray-500 dark:text-gray-400">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {appointment.date}
-                        </div>
-                        <div className="flex items-center text-gray-500 dark:text-gray-400">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {appointment.time}
-                        </div>
-                        <div className="flex items-center text-gray-500 dark:text-gray-400">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {appointment.duration}
+            {loadingAppointments ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">
+                  Loading appointments...
+                </p>
+              </div>
+            ) : filteredAppointments.length > 0 ? (
+              filteredAppointments.map((appointment) => (
+                <div
+                  key={appointment.id}
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700"
+                >
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:space-x-5 w-full sm:flex-1">
+                      <div className="relative">
+                        <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 flex items-center justify-center ring-4 ring-blue-50 dark:ring-blue-900/20 shadow-sm">
+                          <User className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500 dark:text-blue-400" />
                         </div>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 mt-2">
-                        {appointment.symptoms}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row items-center gap-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        appointment.status === "Upcoming"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                      }`}
-                    >
-                      {appointment.status}
-                    </span>
-                    <div className="flex gap-2">
-                      <button className="px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50">
-                        View Details
-                      </button>
-                      {appointment.status === "Upcoming" && (
-                        <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                          Start Session
-                        </button>
-                      )}
+                      <div className="flex-1 space-y-3 w-full">
+                        <div className="flex flex-row sm:items-center justify-evenly sm:justify-between gap-2">
+                          <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
+                            {appointment.patientName}
+                          </h3>
+                          <span
+                            className={`px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-sm font-medium ${
+                              appointment.status === "Upcoming"
+                                ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            }`}
+                          >
+                            {appointment.status}
+                          </span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-center sm:space-x-2 gap-2">
+                          <div className="flex items-center text-gray-600 dark:text-gray-300">
+                            <Mail className="w-5 h-5 mr-3 text-blue-400" />
+                            <span className="text-sm font-medium">
+                              {appointment.email}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-gray-600 dark:text-gray-300">
+                            <Phone className="w-5 h-5 mr-3 text-blue-400" />
+                            <span className="text-sm font-medium">
+                              {appointment.phoneNumber}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-row justify-center sm:justify-normal sm:items-normal flex-wrap gap-2">
+                          <div className="flex items-center text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 px-3 sm:px-4 py-2 rounded-xl shadow-sm">
+                            <Calendar className="w-5 h-5 mr-2 text-blue-400" />
+                            <span className="text-sm font-medium">
+                              {new Date(appointment.date).toLocaleDateString(
+                                "en-GB"
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 px-3 sm:px-4 py-2 rounded-xl shadow-sm">
+                            <Clock className="w-5 h-5 mr-2 text-blue-400" />
+                            <span className="text-sm font-medium">
+                              {appointment.time}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  No Appointments Found
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  You don't have any appointments scheduled at the moment.
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

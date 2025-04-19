@@ -375,4 +375,32 @@ export const approveAppointment = async (id, userId) => {
   }
 };
 
+export const getApproveAppointment = async () => {
+  try {
+    const response = await api.get(`/v1/appointments/scheduled/doctor`);
+    console.log("Raw API Response:", response.data);
+
+    // Check if response has data
+    if (response.data) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+
+    return {
+      success: false,
+      error: "No data received from server",
+    };
+  } catch (error) {
+    console.error("Error in getApproveAppointment:", error);
+    return {
+      success: false,
+      error:
+        error.response?.data?.message ||
+        "Failed to fetch approved appointments",
+    };
+  }
+};
+
 export default api;

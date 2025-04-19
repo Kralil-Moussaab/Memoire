@@ -11,47 +11,58 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="relative bg-gray-900 dark:bg-black text-white pt-20 pb-10 overflow-hidden">
+    <footer className="relative bg-gray-900 dark:bg-slate-900 text-white pt-20 pb-10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-6 text-blue-400">Med-Link</h3>
+            <h3 className="text-xl font-bold mb-6 text-blue-400 dark:text-blue-500">
+              Med-Link
+            </h3>
             <div className="space-y-4">
-              <p className="flex items-center text-gray-300">
-                <MapPin size={18} className="mr-2 text-blue-400" />
+              <p className="flex items-center text-gray-300 dark:text-gray-400">
+                <MapPin
+                  size={18}
+                  className="mr-2 text-blue-400 dark:text-blue-500"
+                />
                 Sidi yacine, Sidi bel abbes
               </p>
-              <p className="flex items-center text-gray-300">
-                <Phone size={18} className="mr-2 text-blue-400" />
+              <p className="flex items-center text-gray-300 dark:text-gray-400">
+                <Phone
+                  size={18}
+                  className="mr-2 text-blue-400 dark:text-blue-500"
+                />
                 +213663522516
               </p>
-              <p className="flex items-center text-gray-300">
-                <Mail size={18} className="mr-2 text-blue-400" />
+              <p className="flex items-center text-gray-300 dark:text-gray-400">
+                <Mail
+                  size={18}
+                  className="mr-2 text-blue-400 dark:text-blue-500"
+                />
                 info@Med-Link.com
               </p>
             </div>
             <div className="flex space-x-4 mt-6">
               <a
                 href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-blue-400 dark:hover:text-blue-500 transition-colors"
               >
                 <Facebook size={20} />
               </a>
               <a
                 href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-blue-400 dark:hover:text-blue-500 transition-colors"
               >
                 <Twitter size={20} />
               </a>
               <a
                 href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-blue-400 dark:hover:text-blue-500 transition-colors"
               >
                 <Instagram size={20} />
               </a>
               <a
                 href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-blue-400 dark:hover:text-blue-500 transition-colors"
               >
                 <Linkedin size={20} />
               </a>
@@ -59,12 +70,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-6 text-gray-200 dark:text-gray-300">
+              Quick Links
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a
                   href="/about"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>About Us
                 </a>
@@ -72,7 +85,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/pricing"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Our Pricing
                 </a>
@@ -80,7 +93,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/gallery"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Our Gallery
                 </a>
@@ -89,12 +102,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-6">Services</h3>
+            <h3 className="text-lg font-semibold mb-6 text-gray-200 dark:text-gray-300">
+              Services
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a
                   href="/services/orthology"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Orthology
                 </a>
@@ -102,7 +117,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/services/neurology"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Neurology
                 </a>
@@ -110,7 +125,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/services/cardiology"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Cardiology
                 </a>
@@ -119,12 +134,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-6">Support</h3>
+            <h3 className="text-lg font-semibold mb-6 text-gray-200 dark:text-gray-300">
+              Support
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a
                   href="/privacy"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Privacy Policy
                 </a>
@@ -132,7 +149,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/terms"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Terms of Service
                 </a>
@@ -140,7 +157,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/contact"
-                  className="text-gray-300 hover:text-blue-400 transition-colors flex items-center"
+                  className="text-gray-300 dark:text-gray-400 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center"
                 >
                   <span className="mr-2">→</span>Contact Us
                 </a>
@@ -155,7 +172,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center mt-4 md:mt-0 space-x-2">
             <span className="text-gray-400 dark:text-gray-500">Made with</span>
-            <Heart className="text-red-500" size={20} />
+            <Heart className="text-red-500 dark:text-red-400" size={20} />
             <span className="text-gray-400 dark:text-gray-500">
               by Med-Link Team
             </span>

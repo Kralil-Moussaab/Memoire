@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -11,11 +12,82 @@ import {
   Baby,
   Bone,
   ChevronDown,
+  Eye,
 } from "lucide-react";
 import cube from "../assets/cube.png";
 import patient from "../assets/patient.png";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [showAllSpecialties, setShowAllSpecialties] = useState(false);
+
+  const specialties = [
+    {
+      name: "Dentistry",
+      icon: <Stethoscope className="text-blue-500" size={24} />,
+      description: "Oral & Dental Care",
+    },
+    {
+      name: "General",
+      icon: <Heart className="text-blue-500" size={24} />,
+      description: "Primary Healthcare",
+    },
+    {
+      name: "Cardiologist",
+      icon: <Activity className="text-blue-500" size={24} />,
+      description: "Heart Specialist",
+    },
+    {
+      name: "Neurologist",
+      icon: <Brain className="text-blue-500" size={24} />,
+      description: "Brain & Nerves",
+    },
+    {
+      name: "ENT",
+      icon: <Microscope className="text-blue-500" size={24} />,
+      description: "Ear, Nose & Throat",
+    },
+    {
+      name: "Dermatologist",
+      icon: <Shield className="text-blue-500" size={24} />,
+      description: "Skin Specialist",
+    },
+    {
+      name: "Gynecologist",
+      icon: <Baby className="text-blue-500" size={24} />,
+      description: "Women's Health",
+    },
+    {
+      name: "Orthopedic",
+      icon: <Bone className="text-blue-500" size={24} />,
+      description: "Bone & Joints",
+    },
+    {
+      name: "Pediatrician",
+      icon: <Baby className="text-blue-500" size={24} />,
+      description: "Child Healthcare",
+    },
+    {
+      name: "Ophthalmologist",
+      icon: <Eye className="text-blue-500" size={24} />,
+      description: "Eye Care",
+    },
+    {
+      name: "Psychiatrist",
+      icon: <Brain className="text-blue-500" size={24} />,
+      description: "Mental Health",
+    },
+    {
+      name: "Urologist",
+      icon: <Activity className="text-blue-500" size={24} />,
+      description: "Urinary System",
+    },
+  ];
+
+  const visibleSpecialties = showAllSpecialties
+    ? specialties
+    : specialties.slice(0, 8);
+
   return (
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800">
       <div className="relative">
@@ -34,7 +106,10 @@ export default function Home() {
                 Book Your Next Appointment or Connect Instantly via Chat or
                 Video Call a particular doctor.
               </p>
-              <button className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors cursor-pointer">
+              <button
+                onClick={() => navigate("/consult")}
+                className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors cursor-pointer"
+              >
                 Consult Now
               </button>
             </div>
@@ -44,7 +119,7 @@ export default function Home() {
 
         <div className="max-w-5xl mx-auto px-4 -mb-20 relative z-10 mt-12">
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
                 <Search
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -81,9 +156,9 @@ export default function Home() {
               <button className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer">
                 Search
               </button>
-            </div>
+            </div> */}
 
-            <div className="mt-8">
+            <div className="">
               <h3 className="text-center text-lg font-semibold mb-6 dark:text-slate-100">
                 What We Offer
               </h3>
@@ -142,7 +217,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-20 pt-52 mb-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-20 pt-40 mb-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-slate-100 mb-4">
             Find By <span className="text-blue-500">Specialisation</span>
@@ -153,98 +228,29 @@ export default function Home() {
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Stethoscope className="text-blue-500" size={24} />
+          {visibleSpecialties.map((specialty, index) => (
+            <div
+              key={index}
+              className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            >
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                {specialty.icon}
+              </div>
+              <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
+                {specialty.name}
+              </p>
+              <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
+                {specialty.description}
+              </p>
             </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              Dentistry
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Oral & Dental Care
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Heart className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              General
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Primary Healthcare
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Activity className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              Cardiologist
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Heart Specialist
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Brain className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              Neurologist
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Brain & Nerves
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Microscope className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              ENT
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Ear, Nose & Throat
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Shield className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              Dermatologist
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Skin Specialist
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Baby className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              Gynecologist
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Women's Health
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Bone className="text-blue-500" size={24} />
-            </div>
-            <p className="text-base md:text-lg font-semibold text-center text-gray-800 dark:text-slate-100">
-              Orthopedic
-            </p>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 text-center mt-2">
-              Bone & Joints
-            </p>
-          </div>
+          ))}
         </div>
         <div className="text-center mt-12">
-          <button className="bg-blue-500 cursor-pointer text-white px-8 md:px-10 py-3 rounded-xl hover:bg-blue-600 transition-colors duration-300 font-medium">
-            View All Specialisations
+          <button
+            onClick={() => setShowAllSpecialties(!showAllSpecialties)}
+            className="bg-blue-500 cursor-pointer text-white px-8 md:px-10 py-3 rounded-xl hover:bg-blue-600 transition-colors duration-300 font-medium"
+          >
+            {showAllSpecialties ? "Show Less" : "View All Specialisations"}
           </button>
         </div>
       </div>
