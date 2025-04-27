@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Send, Phone, Video, Clock, Circle, ArrowLeft } from "lucide-react";
+import { Send, Phone, Video, Clock, Circle, ArrowLeft, Gem } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const onlineDoctors = [
   {
@@ -29,11 +30,13 @@ const onlineDoctors = [
 ];
 
 export default function OnlineConsult() {
+  const navigate = useNavigate();
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showPayment, setShowPayment] = useState(false);
   const [showDoctorList, setShowDoctorList] = useState(true);
+  const [totalJewels, setTotalJewels] = useState(200);
 
   const handleStartChat = (doctor) => {
     setSelectedDoctor(doctor);
@@ -42,18 +45,21 @@ export default function OnlineConsult() {
   };
 
   const handlePayment = () => {
-    setShowPayment(false);
-    setMessages([
-      {
-        id: 1,
-        sender: "doctor",
-        text: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
+    if (totalJewels >= selectedDoctor.price) {
+      setTotalJewels(totalJewels - selectedDoctor.price);
+      setShowPayment(false);
+      setMessages([
+        {
+          id: 1,
+          sender: "doctor",
+          text: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    }
   };
 
   const sendMessage = (e) => {
@@ -83,10 +89,29 @@ export default function OnlineConsult() {
   };
 
   return (
-    <div className=" bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-4 sm:py-8">
+    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 py-4 sm:py-8">
       <div className="max-w-7xl mx-auto px-2 sm:px-4">
+        <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Gem className="w-6 h-6 text-blue-500" />
+              <span className="text-lg font-semibold text-gray-800 dark:text-white">
+                Your Jewels Balance
+              </span>
+            </div>
+            <button
+              onClick={() => navigate("/jewels")}
+              className="flex items-center space-x-2 group"
+            >
+              <Gem className="w-5 h-5 text-blue-500" />
+              <span className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-500 transition-colors">
+                {totalJewels}
+              </span>
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-          {/* Online Doctors List */}
           <div
             className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg ${
               !showDoctorList && "hidden md:block"
@@ -117,9 +142,10 @@ export default function OnlineConsult() {
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {doctor.specialty}
                       </p>
-                      <p className="text-sm text-blue-500">
-                        {doctor.price} Jewels
-                      </p>
+                      <div className="flex items-center space-x-1 text-sm text-blue-500">
+                        <Gem className="w-4 h-4" />
+                        <span>{doctor.price}</span>
+                      </div>
                     </div>
                     <button
                       onClick={() => handleStartChat(doctor)}
@@ -133,7 +159,6 @@ export default function OnlineConsult() {
             </div>
           </div>
 
-          {/* Chat Section */}
           <div
             className={`md:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${
               showDoctorList && !selectedDoctor && "hidden md:block"
@@ -156,20 +181,34 @@ export default function OnlineConsult() {
                 <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                   Start Consultation
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
-                  Consultation with Dr. {selectedDoctor.name} costs{" "}
-                  {selectedDoctor.price} Jewels
-                </p>
-                <button
-                  onClick={handlePayment}
-                  className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Pay {selectedDoctor.price} Jewels
-                </button>
+                <div className="flex items-center space-x-2 mb-6">
+                  <Gem className="w-6 h-6 text-blue-500" />
+                  <span className="text-lg text-gray-600 dark:text-gray-400">
+                    Consultation with Dr. {selectedDoctor.name} costs{" "}
+                    {selectedDoctor.price} Jewels
+                  </span>
+                </div>
+                {totalJewels >= selectedDoctor.price ? (
+                  <button
+                    onClick={handlePayment}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                  >
+                    <Gem className="w-5 h-5" />
+                    <span>Pay {selectedDoctor.price} Jewels</span>
+                  </button>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-red-500 mb-4">
+                      Insufficient Jewels balance. You need {selectedDoctor.price} Jewels.
+                    </p>
+                    <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                      Buy More Jewels
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="h-[600px] flex flex-col">
-                {/* Chat Header */}
                 <div className="p-4 border-b dark:border-gray-700 flex items-center space-x-4">
                   <button
                     onClick={handleBackToList}
@@ -211,7 +250,6 @@ export default function OnlineConsult() {
                   </div>
                 </div>
 
-                {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {messages.map((message) => (
                     <div
@@ -243,8 +281,6 @@ export default function OnlineConsult() {
                     </div>
                   ))}
                 </div>
-
-                {/* Message Input */}
                 <form
                   onSubmit={sendMessage}
                   className="p-4 border-t dark:border-gray-700"

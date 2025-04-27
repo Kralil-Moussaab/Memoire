@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
+import { Menu, X, Sun, Moon, LogOut, User, Calendar } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -51,62 +51,7 @@ export default function Header() {
   };
 
   const renderAuthButtons = () => {
-    if (token) {
-      if (userType === "user") {
-        return (
-          <div className="relative profile-menu-container">
-            <button
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className={`flex items-center space-x-2 ${
-                showProfileMenu
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-              }`}
-            >
-              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-gray-700 flex items-center justify-center">
-                <User size={20} />
-              </div>
-            </button>
-
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2">
-                <Link
-                  to="/profile"
-                  className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                    isActivePath("/profile")
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-700 dark:text-gray-300"
-                  }`}
-                  onClick={() => setShowProfileMenu(false)}
-                >
-                  <div className="flex items-center space-x-2">
-                    <User size={18} />
-                    <span>{user?.name || "Profile"}</span>
-                  </div>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full cursor-pointer text-left px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
-                >
-                  <LogOut size={18} />
-                  <span>Logout</span>
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      } else {
-        return (
-          <div className="flex items-center space-x-4">
-            <Link to="/login">
-              <button className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all cursor-pointer">
-                Login/Signup
-              </button>
-            </Link>
-          </div>
-        );
-      }
-    } else {
+    if (!token) {
       return (
         <Link to="/login">
           <button className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all cursor-pointer">
@@ -115,6 +60,67 @@ export default function Header() {
         </Link>
       );
     }
+
+    if (userType === "user") {
+      return (
+        <div className="relative profile-menu-container">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className={`flex items-center space-x-2 ${
+              showProfileMenu
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            }`}
+          >
+            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-gray-700 flex items-center justify-center">
+              <User size={20} />
+            </div>
+          </button>
+
+          {showProfileMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2">
+              <Link
+                to="/profile"
+                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  isActivePath("/profile")
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+                onClick={() => setShowProfileMenu(false)}
+              >
+                <div className="flex items-center space-x-2">
+                  <User size={18} />
+                  <span>{user?.name || "Profile"}</span>
+                </div>
+              </Link>
+              <Link
+                to="/myappointments"
+                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  isActivePath("/myappointments")
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+                onClick={() => setShowProfileMenu(false)}
+              >
+                <div className="flex items-center space-x-2">
+                  <Calendar size={18} />
+                  <span>My Appointments</span>
+                </div>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full cursor-pointer text-left px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+              >
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -239,7 +245,47 @@ export default function Header() {
             >
               Online Consult
             </Link>
-            {renderAuthButtons()}
+            {token && userType === "user" && (
+              <>
+                <Link
+                  to="/profile"
+                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
+                    isActivePath("/profile")
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <Link
+                  to="/myappointments"
+                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
+                    isActivePath("/myappointments")
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Appointments
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-3 py-2 text-red-500 font-medium rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+            {!token && (
+              <Link
+                to="/login"
+                className="block px-3 py-2 text-center font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login/Signup
+              </Link>
+            )}
           </div>
         </div>
       )}

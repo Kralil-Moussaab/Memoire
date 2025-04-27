@@ -403,4 +403,20 @@ export const getApproveAppointment = async () => {
   }
 };
 
+export const getAppointmentsByUser = async (id) => {
+  try {
+    const response = await api.get(`/v1/appointments/user/${id}`);
+    return {
+      success: true,
+      data: response.data.appointments,
+    };
+  } catch (error) {
+    console.error("Error fetching user appointments:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to fetch appointments",
+    };
+  }
+};
+
 export default api;
