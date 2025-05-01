@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Gem, CreditCard, Check, ArrowLeft, Shield, Clock, Zap } from "lucide-react";
+import { Gem, CreditCard, Check, ArrowLeft, Shield, Clock, Zap, X, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { bayingJewels } from "../services/api"; 
 
 const jewelsPackages = [
   {
@@ -63,6 +64,11 @@ export default function JewelsPage() {
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleCardNumberChange = (e) => {
@@ -73,8 +79,8 @@ export default function JewelsPage() {
 
   const handleExpiryChange = (e) => {
     const value = e.target.value.replace(/\D/g, "");
-    if (value.length <= 4) {
-      const formattedValue = value.replace(/(\d{2})(\d{0,2})/, "$1/$2").trim();
+    if (value.length <= 6) {
+      const formattedValue = value.replace(/(\d{2})(\d{0,4})/, "$1/$2").trim();
       setExpiry(formattedValue);
     }
   };
@@ -87,7 +93,50 @@ export default function JewelsPage() {
   };
 
   const handlePurchase = () => {
-    navigate(-1);
+    if (!cardNumber || !expiry || !cvc) {
+      setError("Please fill in all payment fields");
+      return;
+    }
+    
+    setError("");
+    setShowPasswordModal(true);
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const purchaseData = JSON.stringify({
+        CardNumber: cardNumber.replace(/\s/g, ""), 
+        ExpiryDate: expiry,
+        CVC: cvc,
+        package: selectedPackage.id.toString(),
+        password: password
+      });
+
+      const response = await bayingJewels(purchaseData);
+      
+      if (response.success) {
+        setSuccess(true);
+        setShowPasswordModal(false);
+        setTimeout(() => {
+          navigate(-1);
+        }, 2000);
+      } else {
+        setError(response.error || "Failed to purchase jewels. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred during purchase. Please try again.");
+      console.error("Purchase error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -112,6 +161,92 @@ export default function JewelsPage() {
             Get more Jewels to consult with our expert doctors
           </p>
         </div>
+
+        {success && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full shadow-2xl">
+              <div className="text-center">
+                <div className="inline-flex p-3 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
+                  <Check className="w-12 h-12 text-green-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Purchase Successful!
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  {selectedPackage?.amount} Jewels have been added to your account.
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Redirecting...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  Confirm Purchase
+                </h2>
+                <button 
+                  onClick={() => setShowPasswordModal(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
+                  {error}
+                </div>
+              )}
+              
+              <div className="mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Please enter your password to confirm the purchase of {selectedPackage?.amount} Jewels for ${selectedPackage?.price}.
+                </p>
+                
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmPurchase}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader className="w-5 h-5 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Confirm Purchase"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {jewelsPackages.map((pkg) => (
@@ -201,6 +336,13 @@ export default function JewelsPage() {
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-8">
               Payment Details
             </h2>
+            
+            {error && !showPasswordModal && (
+              <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
+                {error}
+              </div>
+            )}
+            
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -227,8 +369,8 @@ export default function JewelsPage() {
                     type="text"
                     value={expiry}
                     onChange={handleExpiryChange}
-                    placeholder="MM/YY"
-                    maxLength={5}
+                    placeholder="MM/YYYY"
+                    maxLength={7}
                     className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
                   />
                 </div>
@@ -251,7 +393,8 @@ export default function JewelsPage() {
             <div className="mt-8">
               <button
                 onClick={handlePurchase}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center text-lg font-medium"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center text-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 <Gem className="w-6 h-6 mr-2" />
                 Purchase {selectedPackage.amount} Jewels for ${selectedPackage.price}

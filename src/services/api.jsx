@@ -380,7 +380,6 @@ export const getApproveAppointment = async () => {
     const response = await api.get(`/v1/appointments/scheduled/doctor`);
     console.log("Raw API Response:", response.data);
 
-    // Check if response has data
     if (response.data) {
       return {
         success: true,
@@ -419,4 +418,48 @@ export const getAppointmentsByUser = async (id) => {
   }
 };
 
+export const discountJewels = async (data) => {
+  try {
+    const response = await api.patch("/v1/users/balance/chat", data);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error discount jewels:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to discount jewels",
+    };
+  }
+};
+
+export const bayingJewels = async (data) => {
+  try {
+    const response = await api.patch(`/v1/users/update/balance`, data);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error baying jewels:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to baying jewels",
+    };
+  }
+};
+
+export const getUsersById = async (id) => {
+  try {
+    const response = await api.get(`/v1/users/${id}`);
+    return {
+      success: true,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching doctor with id ${id}:`, error);
+    throw error;
+  }
+};
 export default api;

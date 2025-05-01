@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Phone, Video, Clock, Circle, ArrowLeft, Gem } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getUsersById, discountJewels } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const onlineDoctors = [
   {
@@ -9,7 +11,7 @@ const onlineDoctors = [
     specialty: "Cardiologist",
     status: "online",
     image: "https://randomuser.me/api/portraits/women/68.jpg",
-    price: 50,
+    amount: 50,
   },
   {
     id: 2,
@@ -17,7 +19,7 @@ const onlineDoctors = [
     specialty: "Dermatologist",
     status: "online",
     image: "https://randomuser.me/api/portraits/men/32.jpg",
-    price: 45,
+    amount: 45,
   },
   {
     id: 3,
@@ -25,18 +27,34 @@ const onlineDoctors = [
     specialty: "Pediatrician",
     status: "online",
     image: "https://randomuser.me/api/portraits/women/45.jpg",
-    price: 55,
+    amount: 55,
   },
 ];
 
 export default function OnlineConsult() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showPayment, setShowPayment] = useState(false);
   const [showDoctorList, setShowDoctorList] = useState(true);
-  const [totalJewels, setTotalJewels] = useState(200);
+  const [totalJewels, setTotalJewels] = useState(0);
+
+  useEffect(() => {
+    const fetchUserBalance = async () => {
+      if (user && user.id) {
+        const response = await getUsersById(user.id);
+        if (response.success) {
+          setTotalJewels(response.data.balance);
+        } else {
+          console.error("Failed to fetch user balance:", response.error);
+        }
+      }
+    };
+
+    fetchUserBalance();
+  }, [user]);
 
   const handleStartChat = (doctor) => {
     setSelectedDoctor(doctor);
@@ -44,21 +62,30 @@ export default function OnlineConsult() {
     setShowDoctorList(false);
   };
 
-  const handlePayment = () => {
-    if (totalJewels >= selectedDoctor.price) {
-      setTotalJewels(totalJewels - selectedDoctor.price);
-      setShowPayment(false);
-      setMessages([
-        {
-          id: 1,
-          sender: "doctor",
-          text: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      ]);
+  const handlePayment = async () => {
+    if (totalJewels >= selectedDoctor.amount) {
+      try {
+        const response = await discountJewels({ amount: selectedDoctor.amount }); 
+        if (response.success) {
+          setTotalJewels(totalJewels - selectedDoctor.amount);
+          setShowPayment(false);
+          setMessages([
+            {
+              id: 1,
+              sender: "doctor",
+              text: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ]);
+        } else {
+          console.error("Failed to deduct jewels:", response.error);
+        }
+      } catch (error) {
+        console.error("Error during payment:", error);
+      }
     }
   };
 
@@ -144,7 +171,7 @@ export default function OnlineConsult() {
                       </p>
                       <div className="flex items-center space-x-1 text-sm text-blue-500">
                         <Gem className="w-4 h-4" />
-                        <span>{doctor.price}</span>
+                        <span>{doctor.amount}</span>
                       </div>
                     </div>
                     <button
@@ -185,21 +212,21 @@ export default function OnlineConsult() {
                   <Gem className="w-6 h-6 text-blue-500" />
                   <span className="text-lg text-gray-600 dark:text-gray-400">
                     Consultation with Dr. {selectedDoctor.name} costs{" "}
-                    {selectedDoctor.price} Jewels
+                    {selectedDoctor.amount} Jewels
                   </span>
                 </div>
-                {totalJewels >= selectedDoctor.price ? (
+                {totalJewels >= selectedDoctor.amount ? (
                   <button
                     onClick={handlePayment}
                     className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2"
                   >
                     <Gem className="w-5 h-5" />
-                    <span>Pay {selectedDoctor.price} Jewels</span>
+                    <span>Pay {selectedDoctor.amount} Jewels</span>
                   </button>
                 ) : (
                   <div className="text-center">
                     <p className="text-red-500 mb-4">
-                      Insufficient Jewels balance. You need {selectedDoctor.price} Jewels.
+                      Insufficient Jewels balance. You need {selectedDoctor.amount} Jewels.
                     </p>
                     <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                       Buy More Jewels
