@@ -11,6 +11,7 @@ import {
   LogOut,
   Search,
   Bell,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import defaultDoctorImage from "../assets/doc.png";
@@ -18,6 +19,7 @@ import defaultDoctorImage from "../assets/doc.png";
 const sidebarLinks = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/doctor/dashboard" },
   { icon: CalendarDays, label: "Appointments", path: "/doctor/appointments" },
+  { icon: MessageSquare, label: "Chat", path: "/doctor/chat" },
   { icon: Users, label: "My Patients", path: "/doctor/patients" },
   { icon: UserCog, label: "Profile Settings", path: "/doctor/profile" },
 ];

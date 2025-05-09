@@ -303,6 +303,11 @@ export const listDoctors = async (params = {}) => {
       apiParams.page = params.page;
     }
 
+   
+    if (params.status) {
+      apiParams["status[eq]"] = params.status; 
+    }
+
     const response = await api.get("/v1/doctors", { params: apiParams });
     return response.data;
   } catch (error) {
@@ -418,15 +423,23 @@ export const getAppointmentsByUser = async (id) => {
   }
 };
 
-export const discountJewels = async (data) => {
+export const discountJewels = async ({ amount, doctorID }) => {
   try {
-    const response = await api.patch("/v1/users/balance/chat", data);
+    const response = await api.patch("/v1/users/balance/chat", {
+      amount,
+      doctorID,
+    });
+
+    if (response.data.session) {
+      localStorage.setItem('sessionsId', JSON.stringify(response.data.session.id));
+    }
+
     return {
       success: true,
       data: response.data,
     };
   } catch (error) {
-    console.error("Error discount jewels:", error);
+    console.error("Error discounting jewels:", error);
     return {
       success: false,
       error: error.response?.data?.message || "Failed to discount jewels",
@@ -460,6 +473,52 @@ export const getUsersById = async (id) => {
   } catch (error) {
     console.error(`Error fetching doctor with id ${id}:`, error);
     throw error;
+  }
+};
+
+export const getchatMessage = async () => {
+  try {
+    const response = await api.get("/v1/chatMessage");
+    return {
+      success: true,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching message :`, error);
+    throw error;
+  }
+};
+
+export const sendMessage = async (sessionsId, message) => {
+  try {
+    const response = await api.post("/v1/chat/send", { sessionsId, message });
+    const { token, doctor } = response.data;
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Doctor login error:", error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Login failed. Please try again.",
+    };
+  }
+};
+export const goOnline = async (id, data) => {
+  try {
+    const response = await api.patch(`/v1/doctors/${id}`, data);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error going online:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to go online",
+    };
   }
 };
 export default api;

@@ -1,35 +1,8 @@
 import { useState, useEffect } from "react";
 import { Send, Phone, Video, Clock, Circle, ArrowLeft, Gem } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getUsersById, discountJewels } from "../services/api";
+import { getUsersById, discountJewels, listDoctors } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
-
-const onlineDoctors = [
-  {
-    id: 1,
-    name: "Dr. Sarah Smith",
-    specialty: "Cardiologist",
-    status: "online",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
-    amount: 50,
-  },
-  {
-    id: 2,
-    name: "Dr. John Doe",
-    specialty: "Dermatologist",
-    status: "online",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    amount: 45,
-  },
-  {
-    id: 3,
-    name: "Dr. Emily Brown",
-    specialty: "Pediatrician",
-    status: "online",
-    image: "https://randomuser.me/api/portraits/women/45.jpg",
-    amount: 55,
-  },
-];
 
 export default function OnlineConsult() {
   const navigate = useNavigate();
@@ -40,6 +13,8 @@ export default function OnlineConsult() {
   const [showPayment, setShowPayment] = useState(false);
   const [showDoctorList, setShowDoctorList] = useState(true);
   const [totalJewels, setTotalJewels] = useState(0);
+  const [onlineDoctors, setOnlineDoctors] = useState([]);
+  const [loadingDoctors, setLoadingDoctors] = useState(false);
 
   useEffect(() => {
     const fetchUserBalance = async () => {
@@ -53,7 +28,38 @@ export default function OnlineConsult() {
       }
     };
 
+    const fetchOnlineDoctors = async () => {
+      setLoadingDoctors(true); 
+      try {
+        const params = {
+          status: "online"
+        };
+        
+        const response = await listDoctors(params);
+        if (response && response.data) {
+          const formattedDoctors = response.data.map(doctor => ({
+            id: doctor.id,
+            name: doctor.name || "Unknown Doctor",
+            specialty: doctor.speciality || "Specialist",
+            image: doctor.picture || "https://randomuser.me/api/portraits/lego/0.jpg",
+            amount: doctor.consultPrice || Math.floor(Math.random() * 20) + 40,
+          }));
+          
+          setOnlineDoctors(formattedDoctors);
+        } else {
+          console.error("Invalid response format from listDoctors");
+          setOnlineDoctors([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch online doctors:", error);
+        setOnlineDoctors([]);
+      } finally {
+        setLoadingDoctors(false);
+      }
+    };
+
     fetchUserBalance();
+    fetchOnlineDoctors();
   }, [user]);
 
   const handleStartChat = (doctor) => {
@@ -65,7 +71,10 @@ export default function OnlineConsult() {
   const handlePayment = async () => {
     if (totalJewels >= selectedDoctor.amount) {
       try {
-        const response = await discountJewels({ amount: selectedDoctor.amount }); 
+        const response = await discountJewels({
+          amount: selectedDoctor.amount,
+          doctorID: selectedDoctor.id,
+        });
         if (response.success) {
           setTotalJewels(totalJewels - selectedDoctor.amount);
           setShowPayment(false);
@@ -149,39 +158,45 @@ export default function OnlineConsult() {
                 Online Doctors
               </h2>
               <div className="space-y-3 sm:space-y-4">
-                {onlineDoctors.map((doctor) => (
-                  <div
-                    key={doctor.id}
-                    className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={doctor.image}
-                        alt={doctor.name}
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                      />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-700"></span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-800 dark:text-white truncate">
-                        {doctor.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {doctor.specialty}
-                      </p>
-                      <div className="flex items-center space-x-1 text-sm text-blue-500">
-                        <Gem className="w-4 h-4" />
-                        <span>{doctor.amount}</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleStartChat(doctor)}
-                      className="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base whitespace-nowrap"
+                {loadingDoctors ? (
+                  <div className="text-center p-4">Loading doctors...</div>
+                ) : onlineDoctors.length > 0 ? (
+                  onlineDoctors.map((doctor) => (
+                    <div
+                      key={doctor.id}
+                      className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
-                      Chat
-                    </button>
-                  </div>
-                ))}
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={doctor.image}
+                          alt={doctor.name}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                        />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-700"></span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-800 dark:text-white truncate">
+                          {doctor.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {doctor.specialty}
+                        </p>
+                        <div className="flex items-center space-x-1 text-sm text-blue-500">
+                          <Gem className="w-4 h-4" />
+                          <span>{doctor.amount}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleStartChat(doctor)}
+                        className="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base whitespace-nowrap"
+                      >
+                        Chat
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500 dark:text-gray-400">No online doctors available</div>
+                )}
               </div>
             </div>
           </div>
@@ -228,7 +243,7 @@ export default function OnlineConsult() {
                     <p className="text-red-500 mb-4">
                       Insufficient Jewels balance. You need {selectedDoctor.amount} Jewels.
                     </p>
-                    <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    <button onClick={() => navigate("/jewels")} className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                       Buy More Jewels
                     </button>
                   </div>

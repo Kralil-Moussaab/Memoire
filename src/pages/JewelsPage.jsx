@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Gem, CreditCard, Check, ArrowLeft, Shield, Clock, Zap, X, Loader } from "lucide-react";
+import { Gem, CreditCard, Check, ArrowLeft, Shield, Clock, Zap, X, Loader, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { bayingJewels } from "../services/api"; 
+import { bayingJewels } from "../services/api";
+import { Message } from "../shared/Message";
 
 const jewelsPackages = [
   {
@@ -61,6 +62,7 @@ const features = [
 
 export default function JewelsPage() {
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
@@ -97,7 +99,7 @@ export default function JewelsPage() {
       setError("Please fill in all payment fields");
       return;
     }
-    
+
     setError("");
     setShowPasswordModal(true);
   };
@@ -113,7 +115,7 @@ export default function JewelsPage() {
       setError("");
 
       const purchaseData = JSON.stringify({
-        CardNumber: cardNumber.replace(/\s/g, ""), 
+        CardNumber: cardNumber.replace(/\s/g, ""),
         ExpiryDate: expiry,
         CVC: cvc,
         package: selectedPackage.id.toString(),
@@ -121,15 +123,20 @@ export default function JewelsPage() {
       });
 
       const response = await bayingJewels(purchaseData);
-      
+
       if (response.success) {
         setSuccess(true);
         setShowPasswordModal(false);
+        setShowPaymentModal(false);
         setTimeout(() => {
           navigate(-1);
         }, 2000);
       } else {
-        setError(response.error || "Failed to purchase jewels. Please try again.");
+        if (response.error === "Unauthorized to update the balance.") {
+          setError("There is an error in the password!!!.Please try again");
+        } else {
+          setError(response.error || "Failed to purchase jewels. Please try again.");
+        }
       }
     } catch (err) {
       setError("An error occurred during purchase. Please try again.");
@@ -137,6 +144,22 @@ export default function JewelsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const [showPasswords, setShowPasswords] = useState({
+    confirm: false,
+  });
+
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords({
+      ...showPasswords,
+      [field]: !showPasswords[field],
+    });
+  };
+
+  const handleSelectPackage = (pkg) => {
+    setSelectedPackage(pkg);
+    setShowPaymentModal(true);
   };
 
   return (
@@ -163,7 +186,7 @@ export default function JewelsPage() {
         </div>
 
         {success && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full shadow-2xl">
               <div className="text-center">
                 <div className="inline-flex p-3 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
@@ -183,44 +206,142 @@ export default function JewelsPage() {
           </div>
         )}
 
+        {showPaymentModal && (
+          <div className="fixed inset-0 backdrop-blur bg-black/30 flex items-center justify-center z-40">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-lg w-full mx-4">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  Payment Details
+                </h2>
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {error && !showPasswordModal && (
+                <div className="mb-6">
+                  <Message type="error" message={error} onClose={() => setError("")} />
+                </div>
+              )}
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Card Number
+                  </label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      maxLength={19}
+                      placeholder="1234 5678 9012 3456"
+                      className="w-full pl-10 pr-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Expiry Date
+                    </label>
+                    <input
+                      type="text"
+                      value={expiry}
+                      onChange={handleExpiryChange}
+                      placeholder="MM/YYYY"
+                      maxLength={7}
+                      className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      CVC
+                    </label>
+                    <input
+                      type="text"
+                      value={cvc}
+                      onChange={handleCvcChange}
+                      placeholder="123"
+                      maxLength={3}
+                      className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={handlePurchase}
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center text-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <Gem className="w-6 h-6 mr-2" />
+                  Purchase {selectedPackage?.amount} Jewels for ${selectedPackage?.price}
+                </button>
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                  By purchasing, you agree to our Terms of Service
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showPasswordModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full shadow-2xl">
+          <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 border-1 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                   Confirm Purchase
                 </h2>
-                <button 
+                <button
                   onClick={() => setShowPasswordModal(false)}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              
+
               {error && (
-                <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
-                  {error}
+                <div className="mb-6">
+                  <Message type="error" message={error} onClose={() => setError("")} />
                 </div>
               )}
-              
+
               <div className="mb-6">
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Please enter your password to confirm the purchase of {selectedPackage?.amount} Jewels for ${selectedPackage?.price}.
                 </p>
-                
+
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
-                />
+                <div className="relative">
+                  <input
+                    type={showPasswords.confirm ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full pl-4 pr-10 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility("confirm")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  >
+                    {showPasswords.confirm ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+                  </button>
+                </div>
               </div>
-              
+
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => setShowPasswordModal(false)}
@@ -252,11 +373,7 @@ export default function JewelsPage() {
           {jewelsPackages.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300 ${
-                selectedPackage?.id === pkg.id
-                  ? "ring-2 ring-blue-500 scale-105"
-                  : ""
-              }`}
+              className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300"
             >
               {pkg.popular && (
                 <div className="absolute top-0 left-0 right-0">
@@ -291,21 +408,10 @@ export default function JewelsPage() {
                   </div>
                 )}
                 <button
-                  onClick={() => setSelectedPackage(pkg)}
-                  className={`w-full py-2.5 rounded-lg transition-all duration-300 ${
-                    selectedPackage?.id === pkg.id
-                      ? "bg-blue-500 text-white"
-                      : "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white"
-                  }`}
+                  onClick={() => handleSelectPackage(pkg)}
+                  className="w-full py-2.5 rounded-lg transition-all duration-300 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white"
                 >
-                  {selectedPackage?.id === pkg.id ? (
-                    <div className="flex items-center justify-center">
-                      <Check size={20} className="mr-2" />
-                      Selected
-                    </div>
-                  ) : (
-                    "Select Package"
-                  )}
+                  Select Package
                 </button>
               </div>
             </div>
@@ -330,81 +436,6 @@ export default function JewelsPage() {
             </div>
           ))}
         </div>
-
-        {selectedPackage && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-8">
-              Payment Details
-            </h2>
-            
-            {error && !showPasswordModal && (
-              <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Card Number
-                </label>
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={cardNumber}
-                    onChange={handleCardNumberChange}
-                    maxLength={19}
-                    placeholder="1234 5678 9012 3456"
-                    className="w-full pl-10 pr-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    value={expiry}
-                    onChange={handleExpiryChange}
-                    placeholder="MM/YYYY"
-                    maxLength={7}
-                    className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    CVC
-                  </label>
-                  <input
-                    type="text"
-                    value={cvc}
-                    onChange={handleCvcChange}
-                    placeholder="123"
-                    maxLength={3}
-                    className="w-full px-4 py-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white text-lg"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <button
-                onClick={handlePurchase}
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center text-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <Gem className="w-6 h-6 mr-2" />
-                Purchase {selectedPackage.amount} Jewels for ${selectedPackage.price}
-              </button>
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                By purchasing, you agree to our Terms of Service
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -13,8 +13,10 @@ import DoctorLayout from "./shared/DoctorLayout";
 import PatientsPage from "./pages/doctor/PatientsPage";
 import AppointmentsPage from "./pages/doctor/AppointmentsPage";
 import ProfilePage from "./pages/doctor/ProfilePage";
+import ChatPage from "./pages/doctor/ChatPage";
 import AppointmentUser from "./pages/AppointmentUser";
 import JewelsPage from "./pages/JewelsPage";
+
 function App() {
   return (
     <ThemeProvider>
@@ -35,6 +37,7 @@ function App() {
               <Route path="dashboard" element={<DoctorDashboard />} />
               <Route path="patients" element={<PatientsPage />} />
               <Route path="appointments" element={<AppointmentsPage />} />
+              <Route path="chat" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Routes>
