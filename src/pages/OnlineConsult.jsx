@@ -1,20 +1,30 @@
-import { useState, useEffect } from "react";
-import { Send, Phone, Video, Clock, Circle, ArrowLeft, Gem } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { getUsersById, discountJewels, listDoctors } from "../services/api";
-import { useAuth } from "../contexts/AuthContext";
+import { useState, useEffect } from 'react';
+import {
+  Send,
+  Phone,
+  Video,
+  Clock,
+  Circle,
+  ArrowLeft,
+  Gem,
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { getUsersById, discountJewels, listDoctors, sendMessage } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import Echo from '../services/echo';
 
 export default function OnlineConsult() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [showDoctorList, setShowDoctorList] = useState(true);
   const [totalJewels, setTotalJewels] = useState(0);
   const [onlineDoctors, setOnlineDoctors] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
 
   useEffect(() => {
     const fetchUserBalance = async () => {
@@ -23,35 +33,37 @@ export default function OnlineConsult() {
         if (response.success) {
           setTotalJewels(response.data.balance);
         } else {
-          console.error("Failed to fetch user balance:", response.error);
+          console.error('Failed to fetch user balance:', response.error);
         }
       }
     };
 
     const fetchOnlineDoctors = async () => {
-      setLoadingDoctors(true); 
+      setLoadingDoctors(true);
       try {
         const params = {
-          status: "online"
+          status: 'online',
         };
-        
+
         const response = await listDoctors(params);
         if (response && response.data) {
-          const formattedDoctors = response.data.map(doctor => ({
+          const formattedDoctors = response.data.map((doctor) => ({
             id: doctor.id,
-            name: doctor.name || "Unknown Doctor",
-            specialty: doctor.speciality || "Specialist",
-            image: doctor.picture || "https://randomuser.me/api/portraits/lego/0.jpg",
+            name: doctor.name || 'Unknown Doctor',
+            specialty: doctor.speciality || 'Specialist',
+            image:
+              doctor.picture ||
+              'https://randomuser.me/api/portraits/lego/0.jpg',
             amount: doctor.consultPrice || Math.floor(Math.random() * 20) + 40,
           }));
-          
+
           setOnlineDoctors(formattedDoctors);
         } else {
-          console.error("Invalid response format from listDoctors");
+          console.error('Invalid response format from listDoctors');
           setOnlineDoctors([]);
         }
       } catch (error) {
-        console.error("Failed to fetch online doctors:", error);
+        console.error('Failed to fetch online doctors:', error);
         setOnlineDoctors([]);
       } finally {
         setLoadingDoctors(false);
@@ -61,6 +73,31 @@ export default function OnlineConsult() {
     fetchUserBalance();
     fetchOnlineDoctors();
   }, [user]);
+
+  useEffect(() => {
+    if (sessionId) {
+      const channel = Echo.private(`chat.${sessionId}`);
+
+      channel.listen('MessageSent', (e) => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: e.data.id,
+            sender: e.data.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'user',
+            text: e.data.message,
+            time: new Date().toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          },
+        ]);
+      });
+
+      return () => {
+        channel.stopListening('MessageSent');
+      };
+    }
+  }, [sessionId]);
 
   const handleStartChat = (doctor) => {
     setSelectedDoctor(doctor);
@@ -78,43 +115,56 @@ export default function OnlineConsult() {
         if (response.success) {
           setTotalJewels(totalJewels - selectedDoctor.amount);
           setShowPayment(false);
+          const newSessionId = response.data.session.id;
+          setSessionId(newSessionId);
+          localStorage.setItem('sessionId', newSessionId);
           setMessages([
             {
               id: 1,
-              sender: "doctor",
+              sender: 'doctor',
               text: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
               time: new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
+                hour: '2-digit',
+                minute: '2-digit',
               }),
             },
           ]);
         } else {
-          console.error("Failed to deduct jewels:", response.error);
+          console.error('Failed to deduct jewels:', response.error);
         }
       } catch (error) {
-        console.error("Error during payment:", error);
+        console.error('Error during payment:', error);
       }
     }
   };
 
-  const sendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !sessionId) return;
 
-    setMessages([
-      ...messages,
-      {
-        id: messages.length + 1,
-        sender: "user",
-        text: newMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-    setNewMessage("");
+    const currentTime = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    try {
+      const response = await sendMessage(sessionId, newMessage);
+      if (response.success) {
+        setMessages([
+          ...messages,
+          {
+            id: messages.length + 1,
+            sender: 'user',
+            text: newMessage,
+            time: currentTime,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+
+    setNewMessage('');
   };
 
   const handleBackToList = () => {
@@ -122,6 +172,8 @@ export default function OnlineConsult() {
     setShowDoctorList(true);
     setMessages([]);
     setShowPayment(false);
+    setSessionId(null);
+    localStorage.removeItem('sessionId');
   };
 
   return (
@@ -136,7 +188,7 @@ export default function OnlineConsult() {
               </span>
             </div>
             <button
-              onClick={() => navigate("/jewels")}
+              onClick={() => navigate('/jewels')}
               className="flex items-center space-x-2 group"
             >
               <Gem className="w-5 h-5 text-blue-500" />
@@ -149,9 +201,8 @@ export default function OnlineConsult() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <div
-            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg ${
-              !showDoctorList && "hidden md:block"
-            }`}
+            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg ${!showDoctorList && 'hidden md:block'
+              }`}
           >
             <div className="p-4 sm:p-6">
               <h2 className="text-xl font-semibold mb-4 sm:mb-6 text-gray-800 dark:text-white">
@@ -195,16 +246,17 @@ export default function OnlineConsult() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-gray-500 dark:text-gray-400">No online doctors available</div>
+                  <div className="text-gray-500 dark:text-gray-400">
+                    No online doctors available
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
           <div
-            className={`md:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${
-              showDoctorList && !selectedDoctor && "hidden md:block"
-            }`}
+            className={`md:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${showDoctorList && !selectedDoctor && 'hidden md:block'
+              }`}
           >
             {!selectedDoctor ? (
               <div className="h-[600px] flex items-center justify-center p-4 sm:p-6">
@@ -226,7 +278,7 @@ export default function OnlineConsult() {
                 <div className="flex items-center space-x-2 mb-6">
                   <Gem className="w-6 h-6 text-blue-500" />
                   <span className="text-lg text-gray-600 dark:text-gray-400">
-                    Consultation with Dr. {selectedDoctor.name} costs{" "}
+                    Consultation with Dr. {selectedDoctor.name} costs{' '}
                     {selectedDoctor.amount} Jewels
                   </span>
                 </div>
@@ -241,9 +293,13 @@ export default function OnlineConsult() {
                 ) : (
                   <div className="text-center">
                     <p className="text-red-500 mb-4">
-                      Insufficient Jewels balance. You need {selectedDoctor.amount} Jewels.
+                      Insufficient Jewels balance. You need{' '}
+                      {selectedDoctor.amount} Jewels.
                     </p>
-                    <button onClick={() => navigate("/jewels")} className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    <button
+                      onClick={() => navigate('/jewels')}
+                      className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
                       Buy More Jewels
                     </button>
                   </div>
@@ -296,26 +352,23 @@ export default function OnlineConsult() {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${
-                        message.sender === "user"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
+                      className={`flex ${message.sender === 'user'
+                          ? 'justify-end'
+                          : 'justify-start'
+                        }`}
                     >
                       <div
-                        className={`max-w-[85%] sm:max-w-[70%] rounded-lg p-3 ${
-                          message.sender === "user"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white"
-                        }`}
+                        className={`max-w-[85%] sm:max-w-[70%] rounded-lg p-3 ${message.sender === 'user'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
+                          }`}
                       >
                         <p className="break-words">{message.text}</p>
                         <p
-                          className={`text-xs mt-1 ${
-                            message.sender === "user"
-                              ? "text-blue-100"
-                              : "text-gray-500 dark:text-gray-400"
-                          }`}
+                          className={`text-xs mt-1 ${message.sender === 'user'
+                              ? 'text-blue-100'
+                              : 'text-gray-500 dark:text-gray-400'
+                            }`}
                         >
                           {message.time}
                         </p>
@@ -324,7 +377,7 @@ export default function OnlineConsult() {
                   ))}
                 </div>
                 <form
-                  onSubmit={sendMessage}
+                  onSubmit={handleSendMessage}
                   className="p-4 border-t dark:border-gray-700"
                 >
                   <div className="flex space-x-2">

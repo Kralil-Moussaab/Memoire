@@ -429,11 +429,6 @@ export const discountJewels = async ({ amount, doctorID }) => {
       amount,
       doctorID,
     });
-
-    if (response.data.session) {
-      localStorage.setItem('sessionsId', JSON.stringify(response.data.session.id));
-    }
-
     return {
       success: true,
       data: response.data,
@@ -489,23 +484,26 @@ export const getchatMessage = async () => {
   }
 };
 
-export const sendMessage = async (sessionsId, message) => {
+export const sendMessage = async (sessionId, message) => {
   try {
-    const response = await api.post("/v1/chat/send", { sessionsId, message });
-    const { token, doctor } = response.data;
+    const response = await api.post("/v1/chatMessage/send", {
+      sessionId,
+      message
+    });
 
     return {
       success: true,
-      data: response.data,
+      data: response.data
     };
   } catch (error) {
-    console.error("Doctor login error:", error.response?.data || error.message);
+    console.error("Send message error:", error);
     return {
       success: false,
-      error: error.response?.data?.message || "Login failed. Please try again.",
+      error: error.response?.data?.message || "Failed to send message"
     };
   }
 };
+
 export const goOnline = async (id, data) => {
   try {
     const response = await api.patch(`/v1/doctors/${id}`, data);

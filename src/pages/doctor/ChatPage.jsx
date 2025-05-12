@@ -1,37 +1,95 @@
-import { useState, useEffect, useRef } from "react";
-import { Send, Video, Phone, User, X, MoreHorizontal, ArrowLeft } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
-import { goOnline } from "../../services/api";
+import { useState, useEffect, useRef } from 'react';
+import {
+    Send,
+    Video,
+    Phone,
+    User,
+    X,
+    MoreHorizontal,
+    ArrowLeft,
+} from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { goOnline, sendMessage } from '../../services/api';
+import Echo from '../../services/echo';
 
 export default function ChatPage() {
     const { user } = useAuth();
     const [isOnline, setIsOnline] = useState(false);
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState("");
+    const [newMessage, setNewMessage] = useState('');
     const [currentChat, setCurrentChat] = useState(null);
     const messagesEndRef = useRef(null);
+    const [sessionId, setSessionId] = useState(null);
 
     useEffect(() => {
-        const onlineStatus = localStorage.getItem("isOnline");
-        if (onlineStatus === "true") {
+        const onlineStatus = localStorage.getItem('isOnline');
+        if (onlineStatus === 'true') {
             setIsOnline(true);
             setMessages((prev) => [
                 ...prev,
                 {
                     id: prev.length + 1,
-                    sender: "system",
-                    text: "You are online and available for consultations.",
+                    sender: 'system',
+                    text: 'You are online and available for consultations.',
                     time: new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
+                        hour: '2-digit',
+                        minute: '2-digit',
                     }),
                 },
             ]);
         }
     }, []);
 
+    useEffect(() => {
+        if (isOnline && user?.id) {
+            const channel = Echo.private(`doctor.${user.id}`);
+
+            channel.listen('ChatSessionStarted', (e) => {
+                setSessionId(e.session.id);
+                setCurrentChat({
+                    id: e.user.id,
+                    name: e.user.name,
+                    image: e.user.picture || '/api/placeholder/128/128',
+                    lastSeen: 'Just now',
+                });
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        id: prev.length + 1,
+                        sender: 'system',
+                        text: `${e.user.name} has connected for consultation`,
+                        time: new Date().toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        }),
+                    },
+                ]);
+            });
+
+            channel.listen('MessageSent', (e) => {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        id: e.data.id,
+                        sender: e.data.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'patient',
+                        text: e.data.message,
+                        time: new Date().toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        }),
+                    },
+                ]);
+            });
+
+            return () => {
+                channel.stopListening('ChatSessionStarted');
+                channel.stopListening('MessageSent');
+            };
+        }
+    }, [isOnline, user?.id]);
+
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
@@ -40,93 +98,71 @@ export default function ChatPage() {
 
     const handleGoOnline = async () => {
         setIsOnline(true);
-        localStorage.setItem("isOnline", "true");
+        localStorage.setItem('isOnline', 'true');
         setMessages([
             {
                 id: 1,
-                sender: "system",
-                text: "You are now online and available for consultations. Waiting for patients...",
+                sender: 'system',
+                text: 'You are now online and available for consultations. Waiting for patients...',
                 time: new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
+                    hour: '2-digit',
+                    minute: '2-digit',
                 }),
             },
         ]);
 
         const doctorId = user.id;
-        const response = await goOnline(doctorId, { soft: true, status: "online" });
+        const response = await goOnline(doctorId, { soft: true, status: 'online' });
         if (!response.success) {
-            console.error("Failed to update user status:", response.error);
+            console.error('Failed to update user status:', response.error);
         }
     };
 
     const handleGoOffline = async () => {
         const doctorId = user.id;
-        const response = await goOnline(doctorId, { soft: true, status: "offline" });
+        const response = await goOnline(doctorId, {
+            soft: true,
+            status: 'offline',
+        });
         if (response.success) {
             setIsOnline(false);
-            localStorage.removeItem("isOnline");
+            localStorage.removeItem('isOnline');
             setMessages([]);
             setCurrentChat(null);
+            setSessionId(null);
         } else {
-            console.error("Failed to update user status:", response.error);
+            console.error('Failed to update user status:', response.error);
         }
     };
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || !sessionId) return;
 
-        setMessages([
-            ...messages,
-            {
-                id: messages.length + 1,
-                sender: "doctor",
-                text: newMessage,
-                time: new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }),
-            },
-        ]);
-        setNewMessage("");
-    };
+        const currentTime = new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
 
-    useEffect(() => {
-        if (isOnline) {
-            const timer = setTimeout(() => {
-                setCurrentChat({
-                    id: 1,
-                    name: "Sarah Johnson",
-                    image: "/api/placeholder/128/128",
-                    lastSeen: "Just now",
-                });
-                setMessages((prev) => [
-                    ...prev,
+        try {
+            const response = await sendMessage(sessionId, newMessage);
+            if (response.success) {
+                setMessages([
+                    ...messages,
                     {
-                        id: prev.length + 1,
-                        sender: "system",
-                        text: "Sarah Johnson has connected for consultation",
-                        time: new Date().toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        }),
-                    },
-                    {
-                        id: prev.length + 2,
-                        sender: "patient",
-                        text: "Hello doctor, I've been experiencing severe headaches lately.",
-                        time: new Date().toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        }),
+                        id: messages.length + 1,
+                        sender: 'doctor',
+                        text: newMessage,
+                        time: currentTime,
                     },
                 ]);
-            }, 3000);
-
-            return () => clearTimeout(timer);
+            }
+        } catch (error) {
+            console.error('Failed to send message:', error);
         }
-    }, [isOnline]);
+
+        setNewMessage('');
+    };
 
     const formatDate = () => {
         const options = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -146,7 +182,8 @@ export default function ChatPage() {
                                 Start Online Consultation
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-                                Go online to connect with patients and provide virtual medical consultations in real-time
+                                Go online to connect with patients and provide virtual medical
+                                consultations in real-time
                             </p>
                             <button
                                 onClick={handleGoOnline}
@@ -187,9 +224,11 @@ export default function ChatPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold text-gray-900 dark:text-white">
-                                                Dr. {user?.name || "Jane Doe"}
+                                                Dr. {user?.name || 'Jane Doe'}
                                             </h3>
-                                            <p className="text-xs text-green-600 dark:text-green-400">Online • Waiting for patients</p>
+                                            <p className="text-xs text-green-600 dark:text-green-400">
+                                                Online • Waiting for patients
+                                            </p>
                                         </div>
                                     </>
                                 )}
@@ -210,7 +249,9 @@ export default function ChatPage() {
                                     className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer"
                                 >
                                     <X size={16} />
-                                    <span className="text-xs font-medium hidden sm:inline">Go Offline</span>
+                                    <span className="text-xs font-medium hidden sm:inline">
+                                        Go Offline
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -226,18 +267,18 @@ export default function ChatPage() {
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
-                                    className={`flex ${message.sender === "doctor"
-                                            ? "justify-end"
-                                            : message.sender === "system"
-                                                ? "justify-center"
-                                                : "justify-start"
+                                    className={`flex ${message.sender === 'doctor'
+                                            ? 'justify-end'
+                                            : message.sender === 'system'
+                                                ? 'justify-center'
+                                                : 'justify-start'
                                         }`}
                                 >
-                                    {message.sender === "system" ? (
+                                    {message.sender === 'system' ? (
                                         <div className="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-4 py-2 rounded-full text-xs font-medium shadow-sm">
                                             {message.text}
                                         </div>
-                                    ) : message.sender === "doctor" ? (
+                                    ) : message.sender === 'doctor' ? (
                                         <div className="max-w-[70%]">
                                             <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 rounded-2xl rounded-tr-none shadow-sm">
                                                 <p className="break-words">{message.text}</p>
@@ -251,7 +292,6 @@ export default function ChatPage() {
                                             {currentChat && (
                                                 <div className="mr-2 self-end mb-6">
                                                     <User className="w-8 h-8 text-green-600 dark:text-green-400 rounded-full object-cover border-2 border-white dark:border-gray-700" />
-
                                                 </div>
                                             )}
                                             <div>
@@ -271,7 +311,10 @@ export default function ChatPage() {
 
                         {/* Chat Input */}
                         <div className="p-4 bg-white dark:bg-gray-800 border-t dark:border-gray-700">
-                            <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+                            <form
+                                onSubmit={handleSendMessage}
+                                className="flex items-center space-x-2"
+                            >
                                 <input
                                     type="text"
                                     value={newMessage}
