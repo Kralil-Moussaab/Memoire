@@ -383,8 +383,6 @@ export const approveAppointment = async (id, userId) => {
 export const getApproveAppointment = async () => {
   try {
     const response = await api.get(`/v1/appointments/scheduled/doctor`);
-    console.log("Raw API Response:", response.data);
-
     if (response.data) {
       return {
         success: true,

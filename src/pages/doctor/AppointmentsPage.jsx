@@ -12,6 +12,8 @@ import {
   Trash2,
   Mail,
   Phone,
+  Heart,
+  Droplets,
 } from "lucide-react";
 import { Message } from "../../shared/Message";
 import {
@@ -43,11 +45,8 @@ export default function AppointmentsPage() {
       try {
         setLoadingAppointments(true);
         const response = await getApproveAppointment();
-        console.log("Full API Response:", response);
 
         if (response.success && response.data) {
-          console.log("Response data:", response.data);
-
           if (
             !response.data.appointments ||
             !Array.isArray(response.data.appointments)
@@ -59,7 +58,6 @@ export default function AppointmentsPage() {
 
           const formattedAppointments = response.data.appointments.map(
             (appointment) => {
-              console.log("Processing appointment:", appointment);
               return {
                 id: appointment.id,
                 patientName: appointment.user?.name || "Unknown Patient",
@@ -69,11 +67,12 @@ export default function AppointmentsPage() {
                 email: appointment.user?.email || "No email provided",
                 phoneNumber:
                   appointment.user?.phone_number || "No phone provided",
+                chronicDisease: appointment.user?.chronic_disease || "no chronic disease",
+                groupage: appointment.user?.groupage || "no blood type ",
               };
             }
           );
 
-          console.log("Formatted appointments:", formattedAppointments);
           setAppointments(formattedAppointments);
         } else {
           console.error("API Error Response:", response);
@@ -255,7 +254,7 @@ export default function AppointmentsPage() {
                   ([date, times], index) => (
                     <div
                       key={index}
-                      className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+                      className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 hover:shadow-md transition-all duration-200"
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center">
@@ -266,7 +265,7 @@ export default function AppointmentsPage() {
                         </div>
                         <button
                           onClick={() => handleDeleteSlot(date)}
-                          className="text-red-500 hover:text-red-600"
+                          className="text-red-500 hover:text-red-600 transition-colors"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -275,7 +274,7 @@ export default function AppointmentsPage() {
                         {times.map((time, timeIndex) => (
                           <span
                             key={timeIndex}
-                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm flex items-center"
+                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm flex items-center shadow-sm"
                           >
                             <Clock className="w-4 h-4 mr-1" />
                             {time}
@@ -286,7 +285,7 @@ export default function AppointmentsPage() {
                   )
                 )
               ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400">
+                <p className="text-center text-gray-500 dark:text-gray-400 py-4">
                   No available slots found
                 </p>
               )}
@@ -378,7 +377,25 @@ export default function AppointmentsPage() {
                             {appointment.status}
                           </span>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-center sm:space-x-2 gap-2">
+                        
+                        <div className="flex flex-wrap gap-3 mt-2">
+                          {/* Medical Information Pills */}
+                          <div className="flex items-center bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg shadow-sm">
+                            <Droplets className="w-4 h-4 mr-2" />
+                            <span className="text-sm font-medium">
+                              Blood Group: {appointment.groupage}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 px-3 py-1.5 rounded-lg shadow-sm">
+                            <Heart className="w-4 h-4 mr-2" />
+                            <span className="text-sm font-medium">
+                              Chronic Disease: {appointment.chronicDisease}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row items-center sm:space-x-4 gap-2 mt-2">
                           <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <Mail className="w-5 h-5 mr-3 text-blue-400" />
                             <span className="text-sm font-medium">
@@ -392,7 +409,7 @@ export default function AppointmentsPage() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex flex-row justify-center sm:justify-normal sm:items-normal flex-wrap gap-2">
+                        <div className="flex flex-row justify-center sm:justify-normal sm:items-normal flex-wrap gap-2 mt-3">
                           <div className="flex items-center text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 px-3 sm:px-4 py-2 rounded-xl shadow-sm">
                             <Calendar className="w-5 h-5 mr-2 text-blue-400" />
                             <span className="text-sm font-medium">

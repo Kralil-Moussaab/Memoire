@@ -76,29 +76,28 @@ export default function OnlineConsult() {
 
   useEffect(() => {
     if (sessionId) {
-      const channel = Echo.private(`chat.${sessionId}`);
+      const channel = Echo.channel(`chat.${sessionId}`);
 
-      channel.listen('MessageSent', (e) => {
+      channel.listen('.my-event', (e) => {
+        console.log('Received event', e); 
         setMessages((prevMessages) => [
           ...prevMessages,
           {
-            id: e.data.id,
-            sender: e.data.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'user',
-            text: e.data.message,
-            time: new Date().toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
+            sender: e.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'user',
+            message: e.message,
+            sender_id: e.sender_id,
+            sender_type: e.sender_type,
+            timestamp: e.timestamp,
           },
         ]);
       });
-
+  
       return () => {
-        channel.stopListening('MessageSent');
+        Echo.leave(`chat.${sessionId}`); 
       };
     }
   }, [sessionId]);
-
+  
   const handleStartChat = (doctor) => {
     setSelectedDoctor(doctor);
     setShowPayment(true);
