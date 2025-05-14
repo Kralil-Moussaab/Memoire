@@ -268,10 +268,10 @@ export default function ChatPage() {
                                 <div
                                     key={message.id}
                                     className={`flex ${message.sender === 'doctor'
-                                            ? 'justify-end'
-                                            : message.sender === 'system'
-                                                ? 'justify-center'
-                                                : 'justify-start'
+                                        ? 'justify-end'
+                                        : message.sender === 'system'
+                                            ? 'justify-center'
+                                            : 'justify-start'
                                         }`}
                                 >
                                     {message.sender === 'system' ? (

@@ -16,6 +16,10 @@ import ProfilePage from "./pages/doctor/ProfilePage";
 import ChatPage from "./pages/doctor/ChatPage";
 import AppointmentUser from "./pages/AppointmentUser";
 import JewelsPage from "./pages/JewelsPage";
+import AdminLayout from "./shared/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDoctors from "./pages/admin/AdminDoctors";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function App() {
   return (
@@ -39,6 +43,11 @@ function App() {
               <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
+            </Route>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="doctors" element={<AdminDoctors />} />
+              <Route path="users" element={<AdminUsers />} />
             </Route>
           </Routes>
         </AuthProvider>
