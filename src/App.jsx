@@ -20,6 +20,8 @@ import AdminLayout from "./shared/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminLogin from "./pages/admin/AdminLogin";
+import { AdminProtectedRoute, AdminLoginRedirect } from "./pages/admin/AdminProtected";
 
 function App() {
   return (
@@ -44,10 +46,17 @@ function App() {
               <Route path="chat" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="doctors" element={<AdminDoctors />} />
-              <Route path="users" element={<AdminUsers />} />
+
+            <Route element={<AdminLoginRedirect />}>
+              <Route path="/admin-login" element={<AdminLogin />} />
+            </Route>
+
+            <Route element={<AdminProtectedRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="doctors" element={<AdminDoctors />} />
+                <Route path="users" element={<AdminUsers />} />
+              </Route>
             </Route>
           </Routes>
         </AuthProvider>

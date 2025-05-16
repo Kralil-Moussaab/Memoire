@@ -3,6 +3,7 @@ import {
   login as apiLogin,
   loginDoctor as apiLoginDoctor,
   logout as apiLogout,
+  logoutAdmin as apiLogoutAdmin,
   register as apiRegister,
   registerDoctor as apiRegisterDoctor,
   updateUser as apiUpdateUser,
@@ -194,12 +195,25 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const logoutAdmin = async () => {
+    try {
+      await apiLogoutAdmin();
+      clearAuth();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      clearAuth();
+      navigate("/admin-login");
+    }
+  };
+
   const value = {
     user,
     token,
     login,
     loginDoctor,
     logout,
+    logoutAdmin,
     register,
     registerDoctor,
     updateProfile,

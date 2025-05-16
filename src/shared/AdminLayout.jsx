@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
 import {
     ChevronRight,
     ChevronLeft,
@@ -15,6 +15,7 @@ import {
     Moon,
     X
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const sidebarLinks = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
@@ -28,6 +29,8 @@ const adminUser = {
 };
 
 export default function AdminLayout() {
+    const { logoutAdmin } = useAuth();
+    const navigate = useNavigate();
     const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -68,8 +71,8 @@ export default function AdminLayout() {
         }
     }, [windowWidth]);
 
-    const handleLogout = () => {
-        window.location.href = "/login";
+    const handleLogout = async () => {
+        await logoutAdmin();
     };
 
     const toggleMobileSidebar = () => {
