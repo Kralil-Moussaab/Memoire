@@ -199,7 +199,7 @@ export function AuthProvider({ children }) {
     try {
       await apiLogoutAdmin();
       clearAuth();
-      navigate("/login");
+      navigate("/admin-login");
     } catch (error) {
       console.error("Logout error:", error);
       clearAuth();

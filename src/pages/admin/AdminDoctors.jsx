@@ -15,7 +15,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
-import { listDoctors, getDoctorAdminStats } from "../../services/api";
+import { listAdminDoctors, getDoctorAdminStats, approveDoctor } from "../../services/api";
 import defaultDoctorImage from "../../assets/doc.png";
 
 const specialties = [
@@ -33,8 +33,10 @@ export default function AdminDoctors() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState("all");
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
+  const [showApprovalDropdown, setShowApprovalDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -47,10 +49,11 @@ export default function AdminDoctors() {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState(null);
+  const [approvingDoctorId, setApprovingDoctorId] = useState(null);
 
   useEffect(() => {
     fetchDoctors();
-  }, [currentPage, statusFilter, specialtyFilter]);
+  }, [currentPage, searchTerm, statusFilter, specialtyFilter, approvalFilter]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -72,12 +75,13 @@ export default function AdminDoctors() {
     };
 
     fetchStats();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => {
       setShowStatusDropdown(false);
       setShowSpecialtyDropdown(false);
+      setShowApprovalDropdown(false);
     };
 
     document.addEventListener("click", handleClickOutside);
@@ -105,7 +109,11 @@ export default function AdminDoctors() {
         params.speciality = specialtyFilter;
       }
 
-      const response = await listDoctors(params);
+      if (approvalFilter !== "all") {
+        params.approved = approvalFilter === "approved" ? 1 : 0;
+      }
+
+      const response = await listAdminDoctors(params);
 
       if (response && response.data) {
         setDoctors(response.data);
@@ -156,22 +164,43 @@ export default function AdminDoctors() {
     setShowConfirmDelete(showConfirmDelete === doctorId ? null : doctorId);
   };
 
-  const renderStars = (rating) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
+  const handleApproveDoctor = async (doctorId) => {
+    console.log(`Attempting to approve doctor with ID: ${doctorId}`);
+    setApprovingDoctorId(doctorId);
+    try {
+      const response = await approveDoctor({ DoctorId: doctorId });
 
-    return (
-      <div className="flex">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            size={16}
-            className={i < fullStars ? "fill-yellow-400 text-yellow-400" :
-              (i === fullStars && hasHalfStar ? "text-yellow-400" : "text-gray-300")}
-          />
-        ))}
-      </div>
-    );
+      if (response.success) {
+        console.log(`Doctor ${doctorId} approved successfully.`);
+        setDoctors(doctors.map(doctor => {
+          if (doctor.id === doctorId) {
+            return { ...doctor, approved: 1 };
+          }
+          return doctor;
+        }));
+      } else {
+        console.error("Failed to approve doctor:", response.error);
+        alert(`Failed to approve doctor: ${response.error}`);
+      }
+    } catch (error) {
+      console.error("Error approving doctor:", error);
+      alert("An error occurred while trying to approve the doctor.");
+    } finally {
+      setApprovingDoctorId(null);
+    }
+  };
+
+  const renderStars = (rating) => {
+    const filledStars = Math.round(rating);
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      if (i < filledStars) {
+        stars.push(<Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />);
+      } else {
+        stars.push(<Star key={i} size={16} className="text-gray-300 dark:text-gray-600" />);
+      }
+    }
+    return stars;
   };
 
   return (
@@ -208,6 +237,7 @@ export default function AdminDoctors() {
                   e.stopPropagation();
                   setShowStatusDropdown(!showStatusDropdown);
                   setShowSpecialtyDropdown(false);
+                  setShowApprovalDropdown(false);
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 transition-colors duration-200 w-full sm:w-auto justify-between sm:justify-start"
               >
@@ -245,6 +275,7 @@ export default function AdminDoctors() {
                   e.stopPropagation();
                   setShowSpecialtyDropdown(!showSpecialtyDropdown);
                   setShowStatusDropdown(false);
+                  setShowApprovalDropdown(false);
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 transition-colors duration-200 w-full sm:w-auto justify-between sm:justify-start"
               >
@@ -280,6 +311,44 @@ export default function AdminDoctors() {
                         className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         {specialty}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowApprovalDropdown(!showApprovalDropdown);
+                  setShowStatusDropdown(false);
+                  setShowSpecialtyDropdown(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 transition-colors duration-200 w-full sm:w-auto justify-between sm:justify-start"
+              >
+                <div className="flex items-center gap-2">
+                  <Filter size={16} />
+                  <span>{approvalFilter === "all" ? "All Approval Statuses" : approvalFilter.charAt(0).toUpperCase() + approvalFilter.slice(1)}</span>
+                </div>
+                <ChevronDown size={14} />
+              </button>
+              {showApprovalDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 border dark:border-gray-700">
+                  <div className="py-1">
+                    {["all", "approved", "pending"].map((status) => (
+                      <button
+                        key={status}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setApprovalFilter(status);
+                          setShowApprovalDropdown(false);
+                          setCurrentPage(1);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 capitalize"
+                      >
+                        {status === "all" ? "All Approval Statuse" : status}
                       </button>
                     ))}
                   </div>
@@ -393,8 +462,11 @@ export default function AdminDoctors() {
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                     Location
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 text-center py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th className="px-3 sm:px-6 text-center py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Approval Status
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
@@ -440,7 +512,7 @@ export default function AdminDoctors() {
                         {doctor.city}, {doctor.street}
                       </div>
                     </td>
-                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 text-center py-4 whitespace-nowrap">
                       <span
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${doctor.status === "online"
                           ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
@@ -450,11 +522,36 @@ export default function AdminDoctors() {
                         {doctor.status}
                       </span>
                     </td>
+                    <td className="px-3 sm:px-6 text-center py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${doctor.approved === 1
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                          }`}
+                      >
+                        {doctor.approved === 1 ? "Approved" : "Pending"}
+                      </span>
+                    </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center justify-end space-x-1">
+                        {doctor.approved === 0 && (
+                          <button
+                            onClick={() => handleApproveDoctor(doctor.id)}
+                            disabled={approvingDoctorId === doctor.id}
+                            className={`text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 ${approvingDoctorId === doctor.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            title={approvingDoctorId === doctor.id ? "Approving..." : "Approve Doctor"}
+                          >
+                            {approvingDoctorId === doctor.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-600 dark:border-green-400"></div>
+                            ) : (
+                              <Check size={16} />
+                            )}
+                          </button>
+                        )}
                         <button
                           onClick={(e) => toggleDeleteConfirm(e, doctor.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1"
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                          title="Delete Doctor"
                         >
                           <Trash2 size={16} />
                         </button>
