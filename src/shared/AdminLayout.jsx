@@ -24,7 +24,7 @@ const sidebarLinks = [
 ];
 
 const adminUser = {
-    name: "Admin User",
+    name: "Admin",
     role: "Administrator"
 };
 

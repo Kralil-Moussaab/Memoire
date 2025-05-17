@@ -653,4 +653,37 @@ export const approveDoctor = async (DoctorId) => {
   }
 };
 
+export const deletDoctor = async (id) => {
+  try {
+    const response = await api.delete(`/v1/doctors/${id}`);
+    return {
+      success: true,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error(`Error deleting doctor with id ${id}:`, error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to delete doctor",
+    };
+  }
+};
+
+export const deletUser = async (id) => {
+  try {
+    const response = await api.delete(`/v1/users/${id}`);
+    return {
+      success: true,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error(`Error deleting user with id ${id}:`, error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to delete user",
+    };
+  }
+};
+
+
 export default api;
