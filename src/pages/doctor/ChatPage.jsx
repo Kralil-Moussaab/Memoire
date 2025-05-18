@@ -1,16 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-    Send,
-    Video,
-    Phone,
-    User,
-    X,
-    MoreHorizontal,
-    ArrowLeft,
-} from 'lucide-react';
+import { Send, Video, Phone, User, X, MoreHorizontal } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { goOnline, sendMessage } from '../../services/api';
-import Echo from '../../services/echo';
+import { goOnline,sendMessage } from '../../services/api';
+import Pusher from 'pusher-js';
 
 export default function ChatPage() {
     const { user } = useAuth();
@@ -18,99 +10,123 @@ export default function ChatPage() {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [currentChat, setCurrentChat] = useState(null);
-    const messagesEndRef = useRef(null);
     const [sessionId, setSessionId] = useState(null);
+    const messagesEndRef = useRef(null);
+    const pusherRef = useRef(null);
 
     useEffect(() => {
         const onlineStatus = localStorage.getItem('isOnline');
         if (onlineStatus === 'true') {
             setIsOnline(true);
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: prev.length + 1,
-                    sender: 'system',
-                    text: 'You are online and available for consultations.',
-                    time: new Date().toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    }),
-                },
-            ]);
         }
     }, []);
 
     useEffect(() => {
-        if (isOnline && user?.id) {
-            const channel = Echo.private(`doctor.${user.id}`);
+        scrollToBottom();
+    }, [messages]);
 
-            channel.listen('ChatSessionStarted', (e) => {
-                setSessionId(e.session.id);
+    useEffect(() => {
+        if ((!isOnline || !user?.id) && !sessionId) return;
+
+        if (!pusherRef.current) {
+            pusherRef.current = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+                cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+            });
+        }
+        const subscriptions = [];
+
+        if (isOnline && user?.id) {
+            const doctorChannelName = `doctor.${user.id}`;
+            const doctorChannel = pusherRef.current.subscribe(doctorChannelName);
+            subscriptions.push(doctorChannelName);
+
+            doctorChannel.bind('ChatSessionStarted', function (data) {
+                console.log('ChatSessionStarted event received:', data);
+                setSessionId(data.session.id);
                 setCurrentChat({
-                    id: e.user.id,
-                    name: e.user.name,
-                    image: e.user.picture || '/api/placeholder/128/128',
+                    id: data.user.id,
+                    name: data.user.name,
+                    image: data.user.picture || '/api/placeholder/128/128',
                     lastSeen: 'Just now',
                 });
-                setMessages((prev) => [
-                    ...prev,
+
+                setMessages(prev => [
+                    ...prev.filter(m => !m.text.includes('Waiting for patients')),
                     {
-                        id: prev.length + 1,
+                        id: `system-${Date.now()}-${data.user.id}`,
                         sender: 'system',
-                        text: `${e.user.name} has connected for consultation`,
-                        time: new Date().toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        }),
-                    },
+                        text: `${data.user.name} has connected for a consultation`,
+                        time: formatTime(),
+                    }
                 ]);
             });
-
-            channel.listen('MessageSent', (e) => {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        id: e.data.id,
-                        sender: e.data.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'patient',
-                        text: e.data.message,
-                        time: new Date().toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        }),
-                    },
-                ]);
-            });
-
-            return () => {
-                channel.stopListening('ChatSessionStarted');
-                channel.stopListening('MessageSent');
-            };
         }
-    }, [isOnline, user?.id]);
+
+        if (sessionId) {
+            const chatChannelName = `chat.${sessionId}`;
+            const chatChannel = pusherRef.current.subscribe(chatChannelName);
+            subscriptions.push(chatChannelName);
+
+            chatChannel.bind('message', function (data) {
+                console.log('Message event received:', data);
+                const messageId = data.id || Date.now();
+                setMessages(prev => {
+                    if (prev.some(msg => msg.id === messageId)) {
+                        console.log(`Duplicate message received with ID ${messageId}. Ignoring.`);
+                        return prev;
+                    }
+
+                    const newMessage = {
+                        id: messageId,
+                        sender: data.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'patient',
+                        text: data.message,
+                        time: data.created_at ? formatTime(new Date(data.created_at)) : formatTime(),
+                    };
+                    return [...prev, newMessage];
+                });
+            });
+        }
+
+        return () => {
+            subscriptions.forEach(channelName => {
+                console.log(`Unsubscribing from ${channelName}`);
+                pusherRef.current.unsubscribe(channelName);
+            });
+
+            if (!isOnline && !sessionId) {
+                pusherRef.current.disconnect();
+                pusherRef.current = null;
+            }
+        };
+    }, [isOnline, user?.id, sessionId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    const formatTime = (date = new Date()) => {
+        return date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
+    const formatDate = (date = new Date()) => {
+        const options = { weekday: 'long', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    };
 
     const handleGoOnline = async () => {
         setIsOnline(true);
         localStorage.setItem('isOnline', 'true');
         setMessages([
             {
-                id: 1,
+                id: `system-${Date.now()}`,
                 sender: 'system',
                 text: 'You are now online and available for consultations. Waiting for patients...',
-                time: new Date().toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }),
+                time: formatTime(),
             },
         ]);
-
         const doctorId = user.id;
         const response = await goOnline(doctorId, { soft: true, status: 'online' });
         if (!response.success) {
@@ -119,7 +135,7 @@ export default function ChatPage() {
     };
 
     const handleGoOffline = async () => {
-        const doctorId = user.id;
+       const doctorId = user.id;
         const response = await goOnline(doctorId, {
             soft: true,
             status: 'offline',
@@ -136,37 +152,17 @@ export default function ChatPage() {
     };
 
     const handleSendMessage = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         if (!newMessage.trim() || !sessionId) return;
 
-        const currentTime = new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-
+        const messageToSend = newMessage.trim();
+        setNewMessage('');
         try {
-            const response = await sendMessage(sessionId, newMessage);
-            if (response.success) {
-                setMessages([
-                    ...messages,
-                    {
-                        id: messages.length + 1,
-                        sender: 'doctor',
-                        text: newMessage,
-                        time: currentTime,
-                    },
-                ]);
-            }
+            const response = await sendMessage(sessionId, messageToSend);
+            console.log('sendMessage API response:', response);
         } catch (error) {
             console.error('Failed to send message:', error);
         }
-
-        setNewMessage('');
-    };
-
-    const formatDate = () => {
-        const options = { weekday: 'long', month: 'long', day: 'numeric' };
-        return new Date().toLocaleDateString(undefined, options);
     };
 
     return (
@@ -194,7 +190,7 @@ export default function ChatPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="h-[calc(100vh-2rem)] flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+                    <div className="h-screen flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
                         {/* Chat Header */}
                         <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 shadow-sm">
                             <div className="flex items-center space-x-3">
@@ -202,7 +198,6 @@ export default function ChatPage() {
                                     <>
                                         <div className="relative">
                                             <User className="w-12 h-12 text-green-600 dark:text-green-400 rounded-full object-cover border-2 border-white dark:border-gray-700" />
-
                                             <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
                                         </div>
                                         <div>
@@ -279,7 +274,7 @@ export default function ChatPage() {
                                             {message.text}
                                         </div>
                                     ) : message.sender === 'doctor' ? (
-                                        <div className="max-w-[70%]">
+                                        <div className="max-w-md">
                                             <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 rounded-2xl rounded-tr-none shadow-sm">
                                                 <p className="break-words">{message.text}</p>
                                             </div>
@@ -288,7 +283,7 @@ export default function ChatPage() {
                                             </p>
                                         </div>
                                     ) : (
-                                        <div className="max-w-[80%] flex">
+                                        <div className="max-w-md flex">
                                             {currentChat && (
                                                 <div className="mr-2 self-end mb-6">
                                                     <User className="w-8 h-8 text-green-600 dark:text-green-400 rounded-full object-cover border-2 border-white dark:border-gray-700" />
@@ -311,24 +306,27 @@ export default function ChatPage() {
 
                         {/* Chat Input */}
                         <div className="p-4 bg-white dark:bg-gray-800 border-t dark:border-gray-700">
-                            <form
-                                onSubmit={handleSendMessage}
-                                className="flex items-center space-x-2"
-                            >
+                            <div className="flex items-center space-x-2">
                                 <input
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                                     placeholder="Type your message..."
                                     className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white text-sm shadow-inner"
+                                    disabled={!currentChat}
                                 />
                                 <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
+                                    onClick={handleSendMessage}
+                                    disabled={!currentChat || !newMessage.trim()} 
+                                    className={`px-4 py-2 ${currentChat && newMessage.trim()
+                                        ? 'bg-blue-500 hover:bg-blue-600'
+                                        : 'bg-blue-300 cursor-not-allowed'
+                                        } text-white rounded-lg transition-colors`}
                                 >
                                     <Send size={20} />
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 )}

@@ -226,7 +226,7 @@ export default function AdminUsers() {
                             >
                                 Cancel
                             </button>
-                        </div>
+                    </div>
                     </div>
                 </div>
             )}
@@ -377,7 +377,7 @@ export default function AdminUsers() {
             ) : error ? (
                 <div className="text-center py-8 text-red-600 dark:text-red-400">
                     <p>{error}</p>
-                </div>
+                    </div>
             ) : filteredUsers.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No users found.
@@ -391,56 +391,56 @@ export default function AdminUsers() {
                                     <tr>
                                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                             Name
-                                        </th>
+                                    </th>
                                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
-                                            Email
-                                        </th>
+                                        Email
+                                    </th>
                                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
                                             Phone
                                         </th>
                                         <th className="px-3 sm:px-6 text-center py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                                             Age
-                                        </th>
+                                    </th>
                                         <th className="px-3 sm:px-6 text-center py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                                             Sex
-                                        </th>
+                                    </th>
                                         <th className="px-3 sm:px-6 text-center py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                                             Blood Group
-                                        </th>
+                                    </th>
                                         <th className="px-3 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {currentUsers.map((user) => (
-                                        <tr
-                                            key={user.id}
-                                            className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                                        >
+                                    <tr
+                                        key={user.id}
+                                        className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                                    >
                                             <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className="relative">
+                                            <div className="flex items-center">
+                                                <div className="relative">
                                                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border-2 border-gray-200 dark:border-gray-700">
                                                             <User size={16} className="text-gray-500 dark:text-gray-400 sm:hidden" />
                                                             <User size={20} className="text-gray-500 dark:text-gray-400 hidden sm:block" />
-                                                        </div>
+                                                </div>
                                                     </div>
                                                     <div className="ml-2 sm:ml-4">
                                                         <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                                                             {user.name}
                                                         </div>
                                                         <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 md:hidden">
-                                                            {user.email}
-                                                        </div>
+                                                        {user.email}
                                                     </div>
                                                 </div>
-                                            </td>
+                                            </div>
+                                        </td>
                                             <td className="px-3 sm:px-6  py-4 whitespace-nowrap hidden md:table-cell">
                                                 <div className="text-xs sm:text-sm text-gray-900 dark:text-white">
-                                                    {user.email}
-                                                </div>
-                                            </td>
+                                                {user.email}
+                                            </div>
+                                        </td>
                                             <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 dark:text-white hidden sm:table-cell">
                                                 {user.phoneNumber ?? 'N/A'}
                                             </td>
@@ -455,7 +455,7 @@ export default function AdminUsers() {
                                             </td>
                                             <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
                                                 <div className="flex items-center justify-end space-x-1 sm:space-x-3">
-                                                    <button
+                                            <button
                                                         onClick={(e) => toggleDeleteConfirm(e, user.id)}
                                                         disabled={deletingUserId === user.id}
                                                         className={`text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 ${deletingUserId === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -469,7 +469,7 @@ export default function AdminUsers() {
                                                                 <Trash2 size={18} className="hidden sm:block" />
                                                             </>
                                                         )}
-                                                    </button>
+                                            </button>
                                                 </div>
                                                 {showConfirmDelete === user.id && (
                                                     <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -486,30 +486,30 @@ export default function AdminUsers() {
                                                                     <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-white inline-block mr-1"></div>
                                                                 ) : null}
                                                                 Yes
-                                                            </button>
+                                                </button>
                                                             <button
                                                                 onClick={(e) => toggleDeleteConfirm(e, user.id)}
                                                                 disabled={deletingUserId === user.id}
                                                                 className={`flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs py-1 rounded ${deletingUserId === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                             >
                                                                 No
-                                                            </button>
-                                                        </div>
+                                                </button>
+                                            </div>
                                                     </div>
                                                 )}
-                                            </td>
+                                        </td>
 
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                </div>
+            ) : (
                         <div className="grid mb-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {currentUsers.map((user) => (
-                                <UserCardView key={user.id} user={user} />
-                            ))}
-                        </div>
+                        <UserCardView key={user.id} user={user} />
+                    ))}
+                </div>
                     )}
 
                     {/* Render Pagination */}

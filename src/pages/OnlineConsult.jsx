@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Send,
   Phone,
@@ -11,7 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getUsersById, discountJewels, listDoctors, sendMessage } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import Echo from '../services/echo';
+import Pusher from 'pusher-js';
 
 export default function OnlineConsult() {
   const navigate = useNavigate();
@@ -25,6 +25,17 @@ export default function OnlineConsult() {
   const [onlineDoctors, setOnlineDoctors] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const fetchUserBalance = async () => {
@@ -76,28 +87,31 @@ export default function OnlineConsult() {
 
   useEffect(() => {
     if (sessionId) {
-      const channel = Echo.channel(`chat.${sessionId}`);
-
-      channel.listen('.my-event', (e) => {
-        console.log('Received event', e); 
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            sender: e.sender_type === 'App\\Models\\Doctor' ? 'doctor' : 'user',
-            message: e.message,
-            sender_id: e.sender_id,
-            sender_type: e.sender_type,
-            timestamp: e.timestamp,
-          },
-        ]);
+      const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
       });
-  
+
+      const chatChannel = pusher.subscribe(`chat.${sessionId}`);
+
+      chatChannel.bind('message', function (data) {
+        const formattedMessage = {
+          ...data,
+          id: Date.now(),
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        };
+        setMessages((prev) => [...prev, formattedMessage]);
+      });
+
       return () => {
-        Echo.leave(`chat.${sessionId}`); 
+        chatChannel.unsubscribe(`chat.${sessionId}`);
       };
     }
   }, [sessionId]);
-  
+
+
   const handleStartChat = (doctor) => {
     setSelectedDoctor(doctor);
     setShowPayment(true);
@@ -121,7 +135,7 @@ export default function OnlineConsult() {
             {
               id: 1,
               sender: 'doctor',
-              text: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
+              message: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
               time: new Date().toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -154,7 +168,7 @@ export default function OnlineConsult() {
           {
             id: messages.length + 1,
             sender: 'user',
-            text: newMessage,
+            message: newMessage,
             time: currentTime,
           },
         ]);
@@ -258,13 +272,13 @@ export default function OnlineConsult() {
               }`}
           >
             {!selectedDoctor ? (
-              <div className="h-[600px] flex items-center justify-center p-4 sm:p-6">
+              <div className="h-full flex items-center justify-center p-4 sm:p-6">
                 <p className="text-gray-500 dark:text-gray-400">
                   Select a doctor to start consultation
                 </p>
               </div>
             ) : showPayment ? (
-              <div className="h-[600px] flex flex-col items-center justify-center p-4 sm:p-6">
+              <div className="h-full flex flex-col items-center justify-center p-4 sm:p-6">
                 <button
                   onClick={handleBackToList}
                   className="self-start mb-4 p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden"
@@ -347,26 +361,29 @@ export default function OnlineConsult() {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div
+                  ref={chatContainerRef}
+                  className="flex-1 overflow-y-auto p-4 space-y-4"
+                >
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.sender === 'user'
-                          ? 'justify-end'
-                          : 'justify-start'
+                        ? 'justify-end'
+                        : 'justify-start'
                         }`}
                     >
                       <div
                         className={`max-w-[85%] sm:max-w-[70%] rounded-lg p-3 ${message.sender === 'user'
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
                           }`}
                       >
-                        <p className="break-words">{message.text}</p>
+                        <p className="break-words">{message.message || message.text}</p>
                         <p
                           className={`text-xs mt-1 ${message.sender === 'user'
-                              ? 'text-blue-100'
-                              : 'text-gray-500 dark:text-gray-400'
+                            ? 'text-blue-100'
+                            : 'text-gray-500 dark:text-gray-400'
                             }`}
                         >
                           {message.time}
@@ -374,6 +391,7 @@ export default function OnlineConsult() {
                       </div>
                     </div>
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
                 <form
                   onSubmit={handleSendMessage}
