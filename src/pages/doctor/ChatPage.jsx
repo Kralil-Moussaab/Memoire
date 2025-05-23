@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Video, Phone, User, X, MoreHorizontal } from 'lucide-react';
+import { Send, Video, Phone, PhoneOff, User, X, MoreHorizontal } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { goOnline,sendMessage } from '../../services/api';
 import Pusher from 'pusher-js';
@@ -243,10 +243,8 @@ export default function ChatPage() {
                                     onClick={handleGoOffline}
                                     className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer"
                                 >
-                                    <X size={16} />
-                                    <span className="text-xs font-medium hidden sm:inline">
-                                        Go Offline
-                                    </span>
+                                        <PhoneOff size={16} className="mr-1" />
+                                        <span className="text-sm">End Chat</span>
                                 </button>
                             </div>
                         </div>
