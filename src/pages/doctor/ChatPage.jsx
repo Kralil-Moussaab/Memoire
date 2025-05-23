@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Video, Phone, PhoneOff, User, X, MoreHorizontal } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { goOnline,sendMessage } from '../../services/api';
+import { goOnline, sendMessage, endChat } from '../../services/api';
 import Pusher from 'pusher-js';
 
 export default function ChatPage() {
@@ -134,20 +134,23 @@ export default function ChatPage() {
         }
     };
 
-    const handleGoOffline = async () => {
-       const doctorId = user.id;
-        const response = await goOnline(doctorId, {
-            soft: true,
-            status: 'offline',
-        });
-        if (response.success) {
+    const handleEndChat = async () => {
+        if (sessionId) {
+            const response = await endChat(sessionId);
+            if (response.success) {
+                setIsOnline(false);
+                localStorage.removeItem('isOnline');
+                setMessages([]);
+                setCurrentChat(null);
+                setSessionId(null);
+            } else {
+                console.error('Failed to end chat:', response.error);
+            }
+        } else {
             setIsOnline(false);
             localStorage.removeItem('isOnline');
             setMessages([]);
             setCurrentChat(null);
-            setSessionId(null);
-        } else {
-            console.error('Failed to update user status:', response.error);
         }
     };
 
@@ -240,11 +243,11 @@ export default function ChatPage() {
                                     <MoreHorizontal size={18} />
                                 </button>
                                 <button
-                                    onClick={handleGoOffline}
+                                    onClick={handleEndChat}
                                     className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer"
                                 >
-                                        <PhoneOff size={16} className="mr-1" />
-                                        <span className="text-sm">End Chat</span>
+                                    <PhoneOff size={16} className="mr-1" />
+                                    <span className="text-sm">End Chat</span>
                                 </button>
                             </div>
                         </div>
@@ -316,7 +319,7 @@ export default function ChatPage() {
                                 />
                                 <button
                                     onClick={handleSendMessage}
-                                    disabled={!currentChat || !newMessage.trim()} 
+                                    disabled={!currentChat || !newMessage.trim()}
                                     className={`px-4 py-2 ${currentChat && newMessage.trim()
                                         ? 'bg-blue-500 hover:bg-blue-600'
                                         : 'bg-blue-300 cursor-not-allowed'

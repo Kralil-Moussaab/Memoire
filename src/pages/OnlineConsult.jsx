@@ -14,7 +14,7 @@ import {
   PhoneOff,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getUsersById, discountJewels, listDoctors, sendMessage } from '../services/api';
+import { getUsersById, discountJewels, listDoctors, sendMessage, reviewDoctor } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Pusher from 'pusher-js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -209,7 +209,22 @@ export default function OnlineConsult() {
   };
 
   const handleSaveChat = async (shouldSave) => {
-
+    try {
+      if (shouldSave) {
+        const response = await reviewDoctor(sessionId, rating, 'saved');
+        if (response.success) {
+          setShowSaveModal(false);
+          handleBackToList();
+        } else {
+          console.error('Failed to save chat:', response.error);
+        }
+      } else {
+        setShowSaveModal(false);
+        handleBackToList();
+      }
+    } catch (error) {
+      console.error('Error saving chat:', error);
+    }
   };
 
   const handleCloseSaveModal = () => {

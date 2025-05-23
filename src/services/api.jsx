@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://localhost:8000/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -37,7 +37,7 @@ api.interceptors.response.use(
 
 export const login = async (email, password) => {
   try {
-    const response = await api.post("/v1/users/login", { email, password });
+    const response = await api.post("/users/login", { email, password });
     const { token, user } = response.data;
 
     if (token) {
@@ -60,7 +60,7 @@ export const login = async (email, password) => {
 
 export const loginDoctor = async (email, password) => {
   try {
-    const response = await api.post("/v1/doctors/login", { email, password });
+    const response = await api.post("/doctors/login", { email, password });
     const { token, doctor } = response.data;
 
     if (token) {
@@ -94,7 +94,7 @@ export const registerDoctor = async (doctorData) => {
       }
     });
 
-    const response = await api.post("/v1/doctors", formData);
+    const response = await api.post("/doctors", formData);
     const { token, doctor } = response.data;
 
     if (token) {
@@ -122,7 +122,7 @@ export const registerDoctor = async (doctorData) => {
 
 export const register = async (userData) => {
   try {
-    const response = await api.post("/v1/users", userData);
+    const response = await api.post("/users", userData);
     const { token, user } = response.data;
 
     if (token) {
@@ -148,7 +148,7 @@ export const register = async (userData) => {
 export const logout = async () => {
   try {
     const isDoctor = localStorage.getItem("userType") === "doctor";
-    await api.post(isDoctor ? "/v1/doctors/logout" : "/v1/users/logout");
+    await api.post(isDoctor ? "/doctors/logout" : "/users/logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userType");
     return { success: true };
@@ -164,7 +164,7 @@ export const getCurrentUser = async () => {
   try {
     const isDoctor = localStorage.getItem("userType") === "doctor";
     const response = await api.post(
-      isDoctor ? "/v1/doctors/profile" : "/v1/users/profile"
+      isDoctor ? "/doctors/profile" : "/users/profile"
     );
     return isDoctor ? { ...response.data, isDoctor: true } : response.data;
     // return {
@@ -205,7 +205,7 @@ export const updateUser = async (userId, userData) => {
       delete changedData.password;
     }
 
-    const endpoint = isDoctor ? `/v1/doctors/${userId}` : `/v1/users/${userId}`;
+    const endpoint = isDoctor ? `/doctors/${userId}` : `/users/${userId}`;
     const response = await api.put(endpoint, changedData);
 
     if (response.data.update) {
@@ -241,8 +241,8 @@ export const updatePassword = async (userId, passwordData) => {
   try {
     const isDoctor = localStorage.getItem("userType") === "doctor";
     const endpoint = isDoctor
-      ? `/v1/doctors/update/password/${userId}`
-      : `/v1/users/update/password/${userId}`;
+      ? `/doctors/update/password/${userId}`
+      : `/users/update/password/${userId}`;
 
     const response = await api.patch(endpoint, {
       old_password: passwordData.old_password,
@@ -308,7 +308,7 @@ export const listDoctors = async (params = {}) => {
       apiParams["status[eq]"] = params.status;
     }
 
-    const response = await api.get("/v1/doctors", { params: apiParams });
+    const response = await api.get("/doctors", { params: apiParams });
     return response.data;
   } catch (error) {
     console.error("Error fetching doctors:", error);
@@ -318,7 +318,7 @@ export const listDoctors = async (params = {}) => {
 
 export const getDoctorById = async (id) => {
   try {
-    const response = await api.get(`/v1/doctors/${id}`);
+    const response = await api.get(`/doctors/${id}`);
     return {
       success: true,
       data: response.data.data,
@@ -331,7 +331,7 @@ export const getDoctorById = async (id) => {
 
 export const addAppointmentSlots = async (doctorId, slots) => {
   try {
-    const response = await api.post("/v1/appointments", {
+    const response = await api.post("/appointments", {
       doctorId: doctorId,
       date: slots.date,
       time: slots.timeSlots,
@@ -351,7 +351,7 @@ export const addAppointmentSlots = async (doctorId, slots) => {
 
 export const getAppointmentSlotsById = async (id) => {
   try {
-    const response = await api.get(`/v1/appointments/doctor/Scheduled/${id}`);
+    const response = await api.get(`/appointments/doctor/Scheduled/${id}`);
     return {
       success: true,
       data: response.data.data,
@@ -364,7 +364,7 @@ export const getAppointmentSlotsById = async (id) => {
 
 export const approveAppointment = async (id, userId) => {
   try {
-    const response = await api.patch(`/v1/appointments/scheduled/${id}`, {
+    const response = await api.patch(`/appointments/scheduled/${id}`, {
       userId,
     });
     return {
@@ -382,7 +382,7 @@ export const approveAppointment = async (id, userId) => {
 
 export const getApproveAppointment = async () => {
   try {
-    const response = await api.get(`/v1/appointments/scheduled/doctor`);
+    const response = await api.get(`/appointments/scheduled/doctor`);
     if (response.data) {
       return {
         success: true,
@@ -407,7 +407,7 @@ export const getApproveAppointment = async () => {
 
 export const getAppointmentsByUser = async (id) => {
   try {
-    const response = await api.get(`/v1/appointments/user/${id}`);
+    const response = await api.get(`/appointments/user/${id}`);
     return {
       success: true,
       data: response.data.appointments,
@@ -423,7 +423,7 @@ export const getAppointmentsByUser = async (id) => {
 
 export const discountJewels = async ({ amount, doctorID }) => {
   try {
-    const response = await api.patch("/v1/users/balance/chat", {
+    const response = await api.patch("/users/balance/chat", {
       amount,
       doctorID,
     });
@@ -442,7 +442,7 @@ export const discountJewels = async ({ amount, doctorID }) => {
 
 export const bayingJewels = async (data) => {
   try {
-    const response = await api.patch(`/v1/users/update/balance`, data);
+    const response = await api.patch(`/users/update/balance`, data);
     return {
       success: true,
       data: response.data,
@@ -458,7 +458,7 @@ export const bayingJewels = async (data) => {
 
 export const getUsersById = async (id) => {
   try {
-    const response = await api.get(`/v1/users/${id}`);
+    const response = await api.get(`/users/${id}`);
     return {
       success: true,
       data: response.data.data,
@@ -471,7 +471,7 @@ export const getUsersById = async (id) => {
 
 export const getchatMessage = async () => {
   try {
-    const response = await api.get("/v1/chatMessage");
+    const response = await api.get("/chatMessage");
     return {
       success: true,
       data: response.data.data,
@@ -484,7 +484,7 @@ export const getchatMessage = async () => {
 
 export const sendMessage = async (sessionId, message) => {
   try {
-    const response = await api.post("/v1/chatMessage/send", {
+    const response = await api.post("/chatMessage/send", {
       sessionId,
       message
     });
@@ -504,7 +504,7 @@ export const sendMessage = async (sessionId, message) => {
 
 export const goOnline = async (id, data) => {
   try {
-    const response = await api.patch(`/v1/doctors/${id}`, data);
+    const response = await api.patch(`/doctors/${id}`, data);
     return {
       success: true,
       data: response.data,
@@ -520,7 +520,7 @@ export const goOnline = async (id, data) => {
 
 export const loginAdmin = async (email, password) => {
   try {
-    const response = await api.post("/v1/admin/login", { email, password });
+    const response = await api.post("/admin/login", { email, password });
     const { token, user } = response.data;
 
     if (token) {
@@ -544,7 +544,7 @@ export const loginAdmin = async (email, password) => {
 
 export const logoutAdmin = async () => {
   try {
-    await api.post("/v1/admin/logout");
+    await api.post("/admin/logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userType");
     return { success: true };
@@ -558,7 +558,7 @@ export const logoutAdmin = async () => {
 
 export const getAllUsers = async (id) => {
   try {
-    const response = await api.get(`/v1/users`);
+    const response = await api.get(`/users`);
     return {
       success: true,
       data: response.data.data,
@@ -571,7 +571,7 @@ export const getAllUsers = async (id) => {
 
 export const getAdminStats = async (id) => {
   try {
-    const response = await api.get(`/v1/admin/stats`);
+    const response = await api.get(`/admin/stats`);
     return {
       success: true,
       data: response.data,
@@ -584,7 +584,7 @@ export const getAdminStats = async (id) => {
 
 export const getDoctorAdminStats = async (id) => {
   try {
-    const response = await api.get(`/v1/doctor/stats`);
+    const response = await api.get(`/doctor/stats`);
     return {
       success: true,
       data: response.data,
@@ -628,7 +628,7 @@ export const listAdminDoctors = async (params = {}) => {
       apiParams["approved[eq]"] = params.approved;
     }
 
-    const response = await api.get("/v1/admin/doctors", { params: apiParams });
+    const response = await api.get("/admin/doctors", { params: apiParams });
     return response.data;
   } catch (error) {
     console.error("Error fetching doctors:", error);
@@ -638,7 +638,7 @@ export const listAdminDoctors = async (params = {}) => {
 
 export const approveDoctor = async (DoctorId) => {
   try {
-    const response = await api.post("/v1/admin/approve", DoctorId);
+    const response = await api.post("/admin/approve", DoctorId);
 
     return {
       success: true,
@@ -655,7 +655,7 @@ export const approveDoctor = async (DoctorId) => {
 
 export const deletDoctor = async (id) => {
   try {
-    const response = await api.delete(`/v1/doctors/${id}`);
+    const response = await api.delete(`/doctors/${id}`);
     return {
       success: true,
       data: response.data.data,
@@ -671,7 +671,7 @@ export const deletDoctor = async (id) => {
 
 export const deletUser = async (id) => {
   try {
-    const response = await api.delete(`/v1/users/${id}`);
+    const response = await api.delete(`/users/${id}`);
     return {
       success: true,
       data: response.data.data,
@@ -685,5 +685,36 @@ export const deletUser = async (id) => {
   }
 };
 
+export const reviewDoctor = async (id, rating, type) => {
+  try {
+    const response = await api.post(`/ChatSession/review/${id}`, { rating, type });
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error review doctor:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to review doctor",
+    };
+  }
+};
+
+export const endChat = async (id) => {
+  try {
+    const response = await api.post(`/ChatSession/end/${id}`);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error end chat:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to end chat",
+    };
+  }
+};
 
 export default api;
