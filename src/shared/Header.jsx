@@ -259,6 +259,16 @@ export default function Header() {
                   Profile
                 </Link>
                 <Link
+                  to="/mychat"
+                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/myappointments")
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                      : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Chat
+                </Link>
+                <Link
                   to="/myappointments"
                   className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
                     isActivePath("/myappointments")

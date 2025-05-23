@@ -236,8 +236,8 @@ export default function AdminDoctors() {
             onClick={() => setCurrentPage(1)}
             disabled={currentPage === 1}
             className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${currentPage === 1
-                ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
           >
             First
@@ -246,8 +246,8 @@ export default function AdminDoctors() {
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
             className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${currentPage === 1
-                ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
           >
             <ChevronLeft size={14} />
@@ -275,8 +275,8 @@ export default function AdminDoctors() {
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
                   className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${currentPage === pageNum
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                     }`}
                 >
                   {pageNum}
@@ -287,8 +287,8 @@ export default function AdminDoctors() {
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${currentPage === totalPages
-                ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
           >
             <ChevronRight size={14} />
@@ -297,8 +297,8 @@ export default function AdminDoctors() {
             onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage === totalPages}
             className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${currentPage === totalPages
-                ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
           >
             Last
