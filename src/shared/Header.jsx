@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Sun, Moon, LogOut, User, Calendar } from "lucide-react";
+import { Menu, X, Sun, Moon, LogOut, User, Calendar, MessageSquare } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -66,11 +66,10 @@ export default function Header() {
         <div className="relative profile-menu-container">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className={`flex items-center space-x-2 ${
-              showProfileMenu
+            className={`flex items-center space-x-2 ${showProfileMenu
                 ? "text-blue-600 dark:text-blue-400"
                 : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-            }`}
+              }`}
           >
             <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-gray-700 flex items-center justify-center">
               <User size={20} />
@@ -81,11 +80,10 @@ export default function Header() {
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2">
               <Link
                 to="/profile"
-                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                  isActivePath("/profile")
+                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActivePath("/profile")
                     ? "text-blue-600 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
                 onClick={() => setShowProfileMenu(false)}
               >
                 <div className="flex items-center space-x-2">
@@ -94,12 +92,24 @@ export default function Header() {
                 </div>
               </Link>
               <Link
+                to="/mychat"
+                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActivePath("/mychat")
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300"
+                  }`}
+                onClick={() => setShowProfileMenu(false)}
+              >
+                <div className="flex items-center space-x-2">
+                  <MessageSquare size={18} />
+                  <span>My Chat</span>
+                </div>
+              </Link>
+              <Link
                 to="/myappointments"
-                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                  isActivePath("/myappointments")
+                className={`block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActivePath("/myappointments")
                     ? "text-blue-600 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
                 onClick={() => setShowProfileMenu(false)}
               >
                 <div className="flex items-center space-x-2">
@@ -125,11 +135,10 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
           ? "bg-white dark:bg-gray-900 shadow-md dark:shadow-gray-800"
           : "bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800"
-      }`}
+        }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div className="flex items-center">
@@ -144,31 +153,28 @@ export default function Header() {
         <div className="hidden md:flex items-center space-x-8">
           <Link
             to="/"
-            className={`font-medium ${
-              isActivePath("/")
+            className={`font-medium ${isActivePath("/")
                 ? "text-blue-600 dark:text-blue-400"
                 : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-            }`}
+              }`}
           >
             Home
           </Link>
           <Link
             to="/find"
-            className={`font-medium ${
-              isActivePath("/find")
+            className={`font-medium ${isActivePath("/find")
                 ? "text-blue-600 dark:text-blue-400"
                 : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-            }`}
+              }`}
           >
             Find Doctors
           </Link>
           <Link
             to="/consult"
-            className={`font-medium ${
-              isActivePath("/consult")
+            className={`font-medium ${isActivePath("/consult")
                 ? "text-blue-600 dark:text-blue-400"
                 : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-            }`}
+              }`}
           >
             Online Consult
           </Link>
@@ -198,11 +204,10 @@ export default function Header() {
           </button>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`p-2 cursor-pointer ${
-              isMenuOpen
+            className={`p-2 cursor-pointer ${isMenuOpen
                 ? "text-blue-600 dark:text-blue-400"
                 : "text-gray-700 dark:text-gray-300 hover:text-blue-600"
-            }`}
+              }`}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -214,33 +219,30 @@ export default function Header() {
           <div className="px-4 pt-2 pb-3 space-y-2">
             <Link
               to="/"
-              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
-                isActivePath("/")
+              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/")
                   ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
                   : "text-gray-700 dark:text-gray-300"
-              }`}
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/find"
-              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
-                isActivePath("/find")
+              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/find")
                   ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
                   : "text-gray-700 dark:text-gray-300"
-              }`}
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Find Doctors
             </Link>
             <Link
               to="/consult"
-              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
-                isActivePath("/consult")
+              className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/consult")
                   ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
                   : "text-gray-700 dark:text-gray-300"
-              }`}
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Online Consult
@@ -249,11 +251,10 @@ export default function Header() {
               <>
                 <Link
                   to="/profile"
-                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
-                    isActivePath("/profile")
+                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/profile")
                       ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
                       : "text-gray-700 dark:text-gray-300"
-                  }`}
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Profile
@@ -261,8 +262,8 @@ export default function Header() {
                 <Link
                   to="/mychat"
                   className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/myappointments")
-                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
-                      : "text-gray-700 dark:text-gray-300"
+                    ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
+                    : "text-gray-700 dark:text-gray-300"
                     }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -270,11 +271,10 @@ export default function Header() {
                 </Link>
                 <Link
                   to="/myappointments"
-                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${
-                    isActivePath("/myappointments")
+                  className={`block px-3 py-2 font-medium rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 ${isActivePath("/myappointments")
                       ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700"
                       : "text-gray-700 dark:text-gray-300"
-                  }`}
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Appointments
