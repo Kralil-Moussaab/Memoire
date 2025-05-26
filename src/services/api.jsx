@@ -303,7 +303,6 @@ export const listDoctors = async (params = {}) => {
       apiParams.page = params.page;
     }
 
-
     if (params.status) {
       apiParams["status[eq]"] = params.status;
     }
@@ -486,18 +485,18 @@ export const sendMessage = async (sessionId, message) => {
   try {
     const response = await api.post("/chatMessage/send", {
       sessionId,
-      message
+      message,
     });
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
     console.error("Send message error:", error);
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to send message"
+      error: error.response?.data?.message || "Failed to send message",
     };
   }
 };
@@ -619,7 +618,6 @@ export const listAdminDoctors = async (params = {}) => {
       apiParams.page = params.page;
     }
 
-
     if (params.status) {
       apiParams["status[eq]"] = params.status;
     }
@@ -642,13 +640,13 @@ export const approveDoctor = async (DoctorId) => {
 
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
     console.error("approve doctor error:", error);
     return {
       success: false,
-      error: error.response?.data?.message || "Failed to approve doctor "
+      error: error.response?.data?.message || "Failed to approve doctor ",
     };
   }
 };
@@ -687,7 +685,10 @@ export const deletUser = async (id) => {
 
 export const reviewDoctor = async (id, rating, type) => {
   try {
-    const response = await api.post(`/ChatSession/review/${id}`, { rating, type });
+    const response = await api.post(`/chatSession/review/${id}`, {
+      rating,
+      type,
+    });
     return {
       success: true,
       data: response.data,
@@ -703,7 +704,7 @@ export const reviewDoctor = async (id, rating, type) => {
 
 export const endChat = async (id) => {
   try {
-    const response = await api.post(`/ChatSession/end/${id}`);
+    const response = await api.post(`/chatSession/end/${id}`);
     return {
       success: true,
       data: response.data,

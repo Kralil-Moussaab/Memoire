@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Navigate, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+  Link,
+} from "react-router-dom";
 import {
   ChevronRight,
   ChevronLeft,
@@ -53,6 +59,23 @@ export default function DoctorLayout() {
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
 
+  if (user.approved === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+            Waiting for Approval
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Your account is pending approval. Please wait while we review your
+            application.
+          </p>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
   const getDoctorImage = () => user?.picture || defaultDoctorImage;
 
   const handleLogout = async () => {
@@ -85,7 +108,7 @@ export default function DoctorLayout() {
           </button>
         </div>
 
-        <div className="px-4 py-6 flex flex-col h-full">
+        <div className="px-4 py-6 flex flex-col h-[calc(100vh-5rem)]">
           <div className="flex items-center mb-8">
             <img
               src={getDoctorImage()}
@@ -106,8 +129,8 @@ export default function DoctorLayout() {
             )}
           </div>
 
-          <nav className="flex flex-col flex-grow">
-              {sidebarLinks.map((link) => (
+          <nav className="flex flex-col flex-grow space-y-1">
+            {sidebarLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
@@ -123,28 +146,18 @@ export default function DoctorLayout() {
                 {!isSidebarCollapsed && <span>{link.label}</span>}
               </Link>
             ))}
-            
-            <div className="pt-3 mt-30 border-t border-gray-200 dark:border-gray-700">
-              <Link
-                to="/doctor/help"
-                className="flex items-center space-x-3 text-gray-700 dark:text-gray-300 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <HelpCircle
-                  className={`h-6 w-6 ${isSidebarCollapsed ? "mx-auto" : ""}`}
-                />
-                {!isSidebarCollapsed && <span>Help & Support</span>}
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full flex cursor-pointer items-center space-x-3 text-red-500 p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                <LogOut
-                  className={`h-6 w-6 ${isSidebarCollapsed ? "mx-auto" : ""}`}
-                />
-                {!isSidebarCollapsed && <span>Logout</span>}
-              </button>
-            </div>
           </nav>
+          <div className="mt-auto pt-1 border-t border-gray-100 dark:border-gray-700">
+            <button
+              onClick={handleLogout}
+              className="w-full flex cursor-pointer items-center space-x-3 text-red-500 p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+            >
+              <LogOut
+                className={`h-6 w-6 ${isSidebarCollapsed ? "mx-auto" : ""}`}
+              />
+              {!isSidebarCollapsed && <span>Logout</span>}
+            </button>
+          </div>
         </div>
       </aside>
 

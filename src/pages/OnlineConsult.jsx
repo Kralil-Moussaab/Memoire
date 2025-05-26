@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import {
   Send,
   Phone,
@@ -12,19 +12,25 @@ import {
   Trash2,
   X,
   PhoneOff,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { getUsersById, discountJewels, listDoctors, sendMessage, reviewDoctor } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import Pusher from 'pusher-js';
-import { motion, AnimatePresence } from 'framer-motion';
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  getUsersById,
+  discountJewels,
+  listDoctors,
+  sendMessage,
+  reviewDoctor,
+} from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import Pusher from "pusher-js";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function OnlineConsult() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [showPayment, setShowPayment] = useState(false);
   const [showDoctorList, setShowDoctorList] = useState(true);
   const [totalJewels, setTotalJewels] = useState(0);
@@ -40,7 +46,8 @@ export default function OnlineConsult() {
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   };
 
@@ -55,7 +62,7 @@ export default function OnlineConsult() {
         if (response.success) {
           setTotalJewels(response.data.balance);
         } else {
-          console.error('Failed to fetch user balance:', response.error);
+          console.error("Failed to fetch user balance:", response.error);
         }
       }
     };
@@ -64,28 +71,28 @@ export default function OnlineConsult() {
       setLoadingDoctors(true);
       try {
         const params = {
-          status: 'online',
+          status: "online",
         };
 
         const response = await listDoctors(params);
         if (response && response.data) {
           const formattedDoctors = response.data.map((doctor) => ({
             id: doctor.id,
-            name: doctor.name || 'Unknown Doctor',
-            specialty: doctor.speciality || 'Specialist',
+            name: doctor.name || "Unknown Doctor",
+            specialty: doctor.speciality || "Specialist",
             image:
               doctor.picture ||
-              'https://randomuser.me/api/portraits/lego/0.jpg',
+              "https://randomuser.me/api/portraits/lego/0.jpg",
             amount: doctor.consultPrice || Math.floor(Math.random() * 20) + 40,
           }));
 
           setOnlineDoctors(formattedDoctors);
         } else {
-          console.error('Invalid response format from listDoctors');
+          console.error("Invalid response format from listDoctors");
           setOnlineDoctors([]);
         }
       } catch (error) {
-        console.error('Failed to fetch online doctors:', error);
+        console.error("Failed to fetch online doctors:", error);
         setOnlineDoctors([]);
       } finally {
         setLoadingDoctors(false);
@@ -104,18 +111,20 @@ export default function OnlineConsult() {
 
       const chatChannel = pusher.subscribe(`chat.${sessionId}`);
 
-      chatChannel.bind('message', function (data) {
+      chatChannel.bind("message", function (data) {
         const formattedMessage = {
           ...data,
           id: Date.now(),
           time: new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
         };
         setMessages((prev) => [...prev, formattedMessage]);
       });
-
+      chatChannel.bind("ChatSessionEnded", function (data) {
+        setShowRatingModal(true);
+      });
       return () => {
         chatChannel.unsubscribe(`chat.${sessionId}`);
       };
@@ -140,23 +149,23 @@ export default function OnlineConsult() {
           setShowPayment(false);
           const newSessionId = response.data.session.id;
           setSessionId(newSessionId);
-          localStorage.setItem('sessionId', newSessionId);
+          localStorage.setItem("sessionId", newSessionId);
           setMessages([
             {
               id: 1,
-              sender: 'doctor',
+              sender: "doctor",
               message: `Hello! I'm Dr. ${selectedDoctor.name}. How can I help you today?`,
               time: new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
+                hour: "2-digit",
+                minute: "2-digit",
               }),
             },
           ]);
         } else {
-          console.error('Failed to deduct jewels:', response.error);
+          console.error("Failed to deduct jewels:", response.error);
         }
       } catch (error) {
-        console.error('Error during payment:', error);
+        console.error("Error during payment:", error);
       }
     }
   };
@@ -166,8 +175,8 @@ export default function OnlineConsult() {
     if (!newMessage.trim() || !sessionId) return;
 
     const currentTime = new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
     try {
@@ -177,17 +186,17 @@ export default function OnlineConsult() {
           ...messages,
           {
             id: messages.length + 1,
-            sender: 'user',
+            sender: "user",
             message: newMessage,
             time: currentTime,
           },
         ]);
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
     }
 
-    setNewMessage('');
+    setNewMessage("");
   };
 
   const handleBackToList = () => {
@@ -196,7 +205,7 @@ export default function OnlineConsult() {
     setMessages([]);
     setShowPayment(false);
     setSessionId(null);
-    localStorage.removeItem('sessionId');
+    localStorage.removeItem("sessionId");
   };
 
   const handleEndChat = () => {
@@ -211,19 +220,19 @@ export default function OnlineConsult() {
   const handleSaveChat = async (shouldSave) => {
     try {
       if (shouldSave) {
-        const response = await reviewDoctor(sessionId, rating, 'saved');
+        const response = await reviewDoctor(sessionId, rating, "saved");
         if (response.success) {
           setShowSaveModal(false);
           handleBackToList();
         } else {
-          console.error('Failed to save chat:', response.error);
+          console.error("Failed to save chat:", response.error);
         }
       } else {
         setShowSaveModal(false);
         handleBackToList();
       }
     } catch (error) {
-      console.error('Error saving chat:', error);
+      console.error("Error saving chat:", error);
     }
   };
 
@@ -234,18 +243,15 @@ export default function OnlineConsult() {
   const RatingModal = () => (
     <AnimatePresence>
       {showRatingModal && (
-        <motion.div
-          className="fixed inset-0 backdrop-blur flex items-center  justify-center z-50"
-        >
-          <motion.div
-            className="bg-white dark:bg-gray-800 rounded-xl border-1 border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4"
-          >
+        <motion.div className="fixed inset-0 backdrop-blur flex items-center  justify-center z-50">
+          <motion.div className="bg-white dark:bg-gray-800 rounded-xl border-1 border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4">
             <div className="text-center">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Rate Your Experience
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                How would you rate your consultation with Dr. {selectedDoctor?.name}?
+                How would you rate your consultation with Dr.{" "}
+                {selectedDoctor?.name}?
               </p>
               <div className="flex justify-center space-x-2 mb-8">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -258,10 +264,11 @@ export default function OnlineConsult() {
                   >
                     <Star
                       size={32}
-                      className={`${star <= (hoveredRating || rating)
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-300 dark:text-gray-600'
-                        } transition-colors`}
+                      className={`${
+                        star <= (hoveredRating || rating)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300 dark:text-gray-600"
+                      } transition-colors`}
                     />
                   </button>
                 ))}
@@ -276,10 +283,11 @@ export default function OnlineConsult() {
                 <button
                   onClick={handleRatingSubmit}
                   disabled={!rating}
-                  className={`px-4 py-2 rounded-lg transition-colors ${rating
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    rating
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
                 >
                   Submit Rating
                 </button>
@@ -354,7 +362,7 @@ export default function OnlineConsult() {
               </span>
             </div>
             <button
-              onClick={() => navigate('/jewels')}
+              onClick={() => navigate("/jewels")}
               className="flex items-center space-x-2 group"
             >
               <Gem className="w-5 h-5 text-blue-500" />
@@ -367,8 +375,9 @@ export default function OnlineConsult() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <div
-            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg ${!showDoctorList && 'hidden md:block'
-              }`}
+            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg ${
+              !showDoctorList && "hidden md:block"
+            }`}
           >
             <div className="p-4 sm:p-6">
               <h2 className="text-xl font-semibold mb-4 sm:mb-6 text-gray-800 dark:text-white">
@@ -421,8 +430,9 @@ export default function OnlineConsult() {
           </div>
 
           <div
-            className={`md:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${showDoctorList && !selectedDoctor && 'hidden md:block'
-              }`}
+            className={`md:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg ${
+              showDoctorList && !selectedDoctor && "hidden md:block"
+            }`}
           >
             {!selectedDoctor ? (
               <div className="h-full flex items-center justify-center p-4 sm:p-6">
@@ -444,7 +454,7 @@ export default function OnlineConsult() {
                 <div className="flex items-center space-x-2 mb-6">
                   <Gem className="w-6 h-6 text-blue-500" />
                   <span className="text-lg text-gray-600 dark:text-gray-400">
-                    Consultation with Dr. {selectedDoctor.name} costs{' '}
+                    Consultation with Dr. {selectedDoctor.name} costs{" "}
                     {selectedDoctor.amount} Jewels
                   </span>
                 </div>
@@ -459,11 +469,11 @@ export default function OnlineConsult() {
                 ) : (
                   <div className="text-center">
                     <p className="text-red-500 mb-4">
-                      Insufficient Jewels balance. You need{' '}
+                      Insufficient Jewels balance. You need{" "}
                       {selectedDoctor.amount} Jewels.
                     </p>
                     <button
-                      onClick={() => navigate('/jewels')}
+                      onClick={() => navigate("/jewels")}
                       className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       Buy More Jewels
@@ -532,23 +542,28 @@ export default function OnlineConsult() {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === 'user'
-                        ? 'justify-end'
-                        : 'justify-start'
-                        }`}
+                      className={`flex ${
+                        message.sender === "user"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
                     >
                       <div
-                        className={`max-w-[85%] sm:max-w-[70%] rounded-lg p-3 ${message.sender === 'user'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
-                          }`}
+                        className={`max-w-[85%] sm:max-w-[70%] rounded-lg p-3 ${
+                          message.sender === "user"
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white"
+                        }`}
                       >
-                        <p className="break-words">{message.message || message.text}</p>
+                        <p className="break-words">
+                          {message.message || message.text}
+                        </p>
                         <p
-                          className={`text-xs mt-1 ${message.sender === 'user'
-                            ? 'text-blue-100'
-                            : 'text-gray-500 dark:text-gray-400'
-                            }`}
+                          className={`text-xs mt-1 ${
+                            message.sender === "user"
+                              ? "text-blue-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
                         >
                           {message.time}
                         </p>
