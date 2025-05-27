@@ -50,7 +50,7 @@ function App() {
             </Route>
 
             <Route element={<AdminLoginRedirect />}>
-              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
             </Route>
 
             <Route element={<AdminProtectedRoute />}>

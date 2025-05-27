@@ -22,7 +22,7 @@ export const AdminProtectedRoute = () => {
             </div>
         );
     }
-    return isAuthenticated ? <Outlet /> : <Navigate to="/admin-login" replace />;
+    return isAuthenticated ? <Outlet /> : <Navigate to="/admin/login" replace />;
 };
 
 export const AdminLoginRedirect = () => {
