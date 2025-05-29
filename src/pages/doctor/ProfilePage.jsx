@@ -302,13 +302,21 @@ export default function ProfilePage() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Speciality
                       </label>
-                      <input
-                        type="text"
+                      <select
                         name="speciality"
                         value={personalInfo.speciality}
                         onChange={handlePersonalInfoChange}
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      >
+                        <option value="">Select Speciality</option>
+                        <option value="dentist">Dentist</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Orthopedic">Orthopedic</option>
+                        <option value="Gynecologist">Gynecologist</option>
+                        <option value="genralist">Generalist</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
