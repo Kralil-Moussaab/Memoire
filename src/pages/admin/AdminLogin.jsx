@@ -29,7 +29,6 @@ export default function AdminLogin() {
 
     try {
       const result = await loginAdmin(formData.email, formData.password);
-      console.log("API Response:", result);
 
       if (result && result.data && result.data.token) {
         localStorage.setItem("token", result.data.token);

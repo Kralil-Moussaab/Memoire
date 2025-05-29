@@ -718,4 +718,27 @@ export const endChat = async (id) => {
   }
 };
 
+export const getDoctorSaved = async () => {
+  try {
+    const response = await api.get("chat/showDoctor");
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching doctor saved:`, error);
+    throw error;
+  }
+};
+
+export const getDoctorChat = async (id) => {
+  try {
+    const response = await api.get(`/chat/showChat/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching doctor chat:`, error);
+    throw error;
+  }
+};
+
 export default api;
