@@ -23,27 +23,26 @@ export default function MyChat() {
         const response = await getDoctorSaved();
 
         if (response && response.data && response.data.session) {
-          const uniqueDoctors = new Map();
-          response.data.session.forEach((session) => {
-            if (session.doctor && !uniqueDoctors.has(session.doctor.id)) {
-              uniqueDoctors.set(session.doctor.id, {
-                id: session.doctor.id,
-                sessionId: session.id,
-                name: session.doctor.name || "Unknown Doctor",
-                specialty: session.doctor.speciality || "Specialist",
-                image: session.doctor.picture || docImage,
-                status: session.doctor.status,
-                email: session.doctor.email,
-                phoneNumber: session.doctor.phone_number,
-                city: session.doctor.city,
-                street: session.doctor.street,
-                rating: session.doctor.rating,
-                approved: session.doctor.approved,
-              });
-            }
-          });
+          const sessions = response.data.session.map((session) => ({
+            id: session.doctor.id,
+            sessionId: session.id,
+            name: session.doctor.name || "Unknown Doctor",
+            specialty: session.doctor.speciality || "Specialist",
+            image: session.doctor.picture || docImage,
+            status: session.doctor.status,
+            email: session.doctor.email,
+            phoneNumber: session.doctor.phone_number,
+            city: session.doctor.city,
+            street: session.doctor.street,
+            rating: session.doctor.rating,
+            approved: session.doctor.approved,
+            startAt: session.start_at,
+            endedAt: session.ended_at,
+            createdAt: session.created_at,
+            updatedAt: session.updated_at,
+          }));
 
-          setOnlineDoctors(Array.from(uniqueDoctors.values()));
+          setOnlineDoctors(sessions);
         } else {
           console.error(
             "Invalid response format from getDoctorSaved:",
@@ -132,9 +131,9 @@ export default function MyChat() {
                     </p>
                   </div>
                 ) : onlineDoctors.length > 0 ? (
-                  onlineDoctors.map((doctor) => (
+                  onlineDoctors.map((doctor, index) => (
                     <div
-                      key={doctor.id}
+                      key={`${doctor.id}-${doctor.sessionId}`}
                       className="group relative dark rounded-xl p-3 sm:p-4 border-gray-300 dark:border-gray-600 hover:from-blue-50 hover:to-blue-100 dark:hover:from-gray-600 dark:hover:to-gray-650 transition-all duration-300 cursor-pointer border hover:border-blue-200 dark:hover:border-blue-700"
                       onClick={() => handleStartChat(doctor)}
                     >
@@ -147,7 +146,7 @@ export default function MyChat() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold  dark:text-white truncate text-sm sm:text-base">
+                          <h3 className="font-semibold dark:text-white truncate text-sm sm:text-base">
                             {doctor.name}
                           </h3>
                           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
@@ -174,6 +173,10 @@ export default function MyChat() {
                               </span>
                             </div>
                           </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Session:{" "}
+                            {new Date(doctor.createdAt).toLocaleString()}
+                          </p>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                           <ArrowLeft className="w-4 h-4 text-blue-500 transform rotate-180" />
@@ -187,7 +190,7 @@ export default function MyChat() {
                       <Phone className="w-8 h-8 text-gray-400" />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400">
-                      No online doctors available
+                      No chat sessions available
                     </p>
                   </div>
                 )}

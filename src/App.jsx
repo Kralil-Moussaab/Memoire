@@ -21,8 +21,12 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLogin from "./pages/admin/AdminLogin";
-import { AdminProtectedRoute, AdminLoginRedirect } from "./pages/admin/AdminProtected";
+import {
+  AdminProtectedRoute,
+  AdminLoginRedirect,
+} from "./pages/admin/AdminProtected";
 import MyChat from "./pages/MyChat";
+import BookConsultation from "./pages/BookConsultation";
 
 function App() {
   return (
@@ -34,6 +38,7 @@ function App() {
               <Route index element={<Home />} />
               <Route path="login" element={<AuthPage />} />
               <Route path="find" element={<FindDoctors />} />
+              <Route path="bookConsultation" element={<BookConsultation />} />
               <Route path="doctor/:id" element={<DoctorProfile />} />
               <Route path="consult" element={<OnlineConsult />} />
               <Route path="mychat" element={<MyChat />} />

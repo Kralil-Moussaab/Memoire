@@ -522,16 +522,7 @@ export default function OnlineConsult() {
                         size={20}
                         className="text-gray-600 dark:text-gray-400"
                       />
-                    </button>
-                    {!showPayment && (
-                      <button
-                        onClick={handleEndChat}
-                        className="flex items-center px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                      >
-                        <PhoneOff size={16} className="mr-1" />
-                        <span className="text-sm">End Chat</span>
-                      </button>
-                    )}
+                    </button>                  
                   </div>
                 </div>
 

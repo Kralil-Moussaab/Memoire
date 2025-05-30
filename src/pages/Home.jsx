@@ -23,12 +23,12 @@ export default function Home() {
 
   const specialties = [
     {
-      name: "Dentistry",
+      name: "dentist",
       icon: <Stethoscope className="text-blue-500" size={24} />,
       description: "Oral & Dental Care",
     },
     {
-      name: "General",
+      name: "genralist",
       icon: <Heart className="text-blue-500" size={24} />,
       description: "Primary Healthcare",
     },
@@ -163,7 +163,10 @@ export default function Home() {
                 What We Offer
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-blue-50 dark:bg-slate-700 p-6 rounded-xl text-center">
+                <div
+                  onClick={() => navigate("/find")}
+                  className="bg-blue-50 dark:bg-slate-700 p-6 rounded-xl text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-600 transition-colors"
+                >
                   <div className="w-12 h-12 bg-white dark:bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="text-blue-500" size={24} />
                   </div>
@@ -191,7 +194,10 @@ export default function Home() {
                     Book Appointment
                   </h4>
                 </div>
-                <div className="bg-blue-50 dark:bg-slate-700 p-6 rounded-xl text-center">
+                <div
+                  onClick={() => navigate("/consult")}
+                  className="bg-blue-50 dark:bg-slate-700 p-6 rounded-xl text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-600 transition-colors"
+                >
                   <div className="w-12 h-12 bg-white dark:bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg
                       className="w-6 h-6 text-blue-500"
@@ -231,6 +237,9 @@ export default function Home() {
           {visibleSpecialties.map((specialty, index) => (
             <div
               key={index}
+              onClick={() =>
+                navigate("/find", { state: { specialty: specialty.name } })
+              }
               className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
             >
               <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">

@@ -40,14 +40,86 @@ export default function FindDoctors() {
   ];
 
   useEffect(() => {
-    fetchDoctors();
-  }, [currentPage]);
+    const specialtyFromState = location.state?.specialty;
+
+    if (specialtyFromState) {
+      setSpecialtyFilter(specialtyFromState);
+      setActiveFilters((prev) => ({
+        ...prev,
+        specialty: specialtyFromState,
+      }));
+      fetchDoctorsWithSpecialty(specialtyFromState);
+    } else {
+      fetchDoctors();
+    }
+  }, []);
+  const fetchDoctorsWithSpecialty = async (specialty) => {
+    setLoading(true);
+    try {
+      const params = {
+        page: currentPage,
+        speciality: specialty,
+      };
+
+      const response = await listDoctors(params);
+
+      if (response && response.data) {
+        const formattedDoctors = response.data.map((doctor) => ({
+          id: doctor.id,
+          name: doctor.name || "Unknown Doctor",
+          specialty: doctor.speciality || getRandomSpecialty(),
+          experience: `${
+            Math.floor(Math.random() * 20) + 1
+          } years experience overall`,
+          location: `${doctor.city || "Unknown"}, ${doctor.street || ""}`,
+          clinic: doctor.formations || "Medical Center",
+          rating: doctor.rating || Math.floor(Math.random() * 20) + 80,
+          patientStories: Math.floor(Math.random() * 100) + 10,
+          gender: doctor.gender || (Math.random() > 0.5 ? "male" : "female"),
+          picture: getDoctorImage(doctor),
+          availability: ["Today", "Tomorrow", "Next Week"],
+          typeConsultation:
+            doctor.typeConsultation ||
+            (Math.random() > 0.5 ? "In-person" : "Online"),
+        }));
+
+        setDoctors(formattedDoctors);
+
+        if (response.links && response.links.last) {
+          const lastPageUrl = new URL(response.links.last);
+          const lastPage = parseInt(
+            lastPageUrl.searchParams.get("page") || "1"
+          );
+          setTotalPages(lastPage);
+        } else if (response.meta && response.meta.last_page) {
+          setTotalPages(response.meta.last_page);
+        } else {
+          setTotalPages(Math.max(1, Math.ceil(response.data.length / 10)));
+        }
+
+        setError(null);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (err) {
+      console.error("Failed to fetch doctors:", err);
+      setError("Failed to load doctors. Please try again later.");
+      setDoctors(generateMockDoctors());
+      setTotalPages(2);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (currentPage !== 1) {
       setCurrentPage(1);
     } else {
-      fetchDoctors();
+      if (specialtyFilter) {
+        fetchDoctorsWithSpecialty(specialtyFilter);
+      } else {
+        fetchDoctors();
+      }
     }
   }, [specialtyFilter, genderFilter, activeFilters]);
 
@@ -486,7 +558,14 @@ export default function FindDoctors() {
                         >
                           See Profile
                         </button>
-                        <button className="bg-blue-500 text-white cursor-pointer px-4 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto">
+                        <button
+                          onClick={() =>
+                            navigate("/bookConsultation", {
+                              state: { doctor },
+                            })
+                          }
+                          className="bg-blue-500 text-white cursor-pointer px-4 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium w-full sm:w-auto"
+                        >
                           Book Consultation
                         </button>
                       </div>
