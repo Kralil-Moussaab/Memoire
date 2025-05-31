@@ -41,7 +41,6 @@ export default function ChatPage() {
             subscriptions.push(doctorChannelName);
 
             doctorChannel.bind('ChatSessionStarted', function (data) {
-                console.log('ChatSessionStarted event received:', data);
                 setSessionId(data.session.id);
                 setCurrentChat({
                     id: data.user.id,
@@ -68,11 +67,9 @@ export default function ChatPage() {
             subscriptions.push(chatChannelName);
 
             chatChannel.bind('message', function (data) {
-                console.log('Message event received:', data);
                 const messageId = data.id || Date.now();
                 setMessages(prev => {
                     if (prev.some(msg => msg.id === messageId)) {
-                        console.log(`Duplicate message received with ID ${messageId}. Ignoring.`);
                         return prev;
                     }
 
@@ -89,7 +86,6 @@ export default function ChatPage() {
 
         return () => {
             subscriptions.forEach(channelName => {
-                console.log(`Unsubscribing from ${channelName}`);
                 pusherRef.current.unsubscribe(channelName);
             });
 
@@ -162,7 +158,6 @@ export default function ChatPage() {
         setNewMessage('');
         try {
             const response = await sendMessage(sessionId, messageToSend);
-            console.log('sendMessage API response:', response);
         } catch (error) {
             console.error('Failed to send message:', error);
         }

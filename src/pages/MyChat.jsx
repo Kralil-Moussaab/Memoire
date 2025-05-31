@@ -28,7 +28,9 @@ export default function MyChat() {
             sessionId: session.id,
             name: session.doctor.name || "Unknown Doctor",
             specialty: session.doctor.speciality || "Specialist",
-            image: session.doctor.picture || docImage,
+            image: session.doctor.picture
+              ? `http://localhost:8000/storage/${session.doctor.picture}`
+              : docImage,
             status: session.doctor.status,
             email: session.doctor.email,
             phoneNumber: session.doctor.phone_number,
@@ -143,6 +145,10 @@ export default function MyChat() {
                             src={doctor.image}
                             alt={doctor.name}
                             className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-1 ring-blue-100 dark:ring-gray-600 group-hover:ring-blue-300 transition-all"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = docImage;
+                            }}
                           />
                         </div>
                         <div className="flex-1 min-w-0">

@@ -279,7 +279,7 @@ export default function Profile() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {/* <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Age
                         </label>
                         <div className="relative group">
@@ -296,7 +296,7 @@ export default function Profile() {
                           />
                         </div>
                       </div>
-                      <div>
+                      <div> */}
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Gender
                         </label>
@@ -606,7 +606,7 @@ export default function Profile() {
 
       {/* Password Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-40">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
             <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
               Confirm Your Password

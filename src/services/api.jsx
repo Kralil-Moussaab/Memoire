@@ -741,4 +741,30 @@ export const getDoctorChat = async (id) => {
   }
 };
 
+export const getPatientOfDoctor = async () => {
+  try {
+    const response = await api.get("doctor/client");
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching doctor clients:`, error);
+    throw error;
+  }
+};
+
+export const getStatsDoctor = async () => {
+  try {
+    const response = await api.get("doctor/myStats");
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching doctor stats:`, error);
+    throw error;
+  }
+};
+
 export default api;
