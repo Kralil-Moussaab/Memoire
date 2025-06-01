@@ -24,15 +24,21 @@ export default function FindDoctors() {
   const [activeFilters, setActiveFilters] = useState({});
   const [success, setSuccess] = useState(null);
 
-  const specialties = [
-    "dentist",
-    "Cardiologist",
-    "Neurologist",
-    "Dermatologist",
-    "Orthopedic",
-    "Gynecologist",
-    "genralist",
-  ];
+const specialties = [
+  "Dentistry",
+  "Genralist",
+  "Cardiologist",
+  "Neurologist",
+  "ENT",
+  "Dermatologist",
+  "Gynecologist",
+  "Orthopedic",
+  "Pediatrician",
+  "Ophthalmologist",
+  "Psychiatrist",
+  "Urologist",
+];
+
 
   const genders = [
     { value: "male", label: "Male" },

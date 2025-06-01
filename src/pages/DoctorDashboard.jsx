@@ -85,7 +85,7 @@ export default function DoctorDashboard() {
         },
         {
           title: "Revenue",
-          value: "$12,345",
+          value: stats.balance,
           icon: <DollarSign className="h-6 w-6 text-purple-500" />,
         },
       ]

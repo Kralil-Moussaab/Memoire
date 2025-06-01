@@ -796,13 +796,18 @@ function DoctorRegisterForm({ setError, navigate }) {
                 <option value="" disabled>
                   Select a speciality
                 </option>
-                <option value="Dentist">Dentist</option>
+                <option value="Dentistry">Dentistry</option>
+                <option value="Genralist">Genralist</option>
                 <option value="Cardiologist">Cardiologist</option>
                 <option value="Neurologist">Neurologist</option>
+                <option value="ENT">ENT</option>
                 <option value="Dermatologist">Dermatologist</option>
-                <option value="Orthopedic">Orthopedic</option>
                 <option value="Gynecologist">Gynecologist</option>
-                <option value="Generalist">Generalist</option>
+                <option value="Orthopedic">Orthopedic</option>
+                <option value="Pediatrician">Pediatrician</option>
+                <option value="Ophthalmologist">Ophthalmologist</option>
+                <option value="Psychiatrist">Psychiatrist</option>
+                <option value="Urologist">Urologist</option>
               </select>
             </div>
             <div>

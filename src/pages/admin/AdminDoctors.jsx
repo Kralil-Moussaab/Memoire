@@ -14,6 +14,7 @@ import {
   MapPin,
   Mail,
   Phone,
+  Clock,
 } from "lucide-react";
 import {
   listAdminDoctors,
@@ -45,6 +46,8 @@ export default function AdminDoctors() {
     totalDoctor: 0,
     totalDoctorOnline: 0,
     totalDoctorOffline: 0,
+    approved: 0,
+    notApproved: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState(null);
@@ -459,13 +462,18 @@ export default function AdminDoctors() {
                       All Specialties
                     </button>
                     {[
-                      "Dentist",
+                      "Dentistry",
+                      "Genralist",
                       "Cardiologist",
                       "Neurologist",
+                      "ENT",
                       "Dermatologist",
-                      "Orthopedic",
                       "Gynecologist",
-                      "Generalist",
+                      "Orthopedic",
+                      "Pediatrician",
+                      "Ophthalmologist",
+                      "Psychiatrist",
+                      "Urologist",
                     ].map((specialty) => (
                       <button
                         key={specialty}
@@ -587,7 +595,7 @@ export default function AdminDoctors() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -632,6 +640,41 @@ export default function AdminDoctors() {
             </div>
             <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
               <X className="text-red-600 dark:text-red-400" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Approved Doctors
+              </p>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                {doctorStats.approved}
+              </h3>
+            </div>
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <Check className="text-green-600 dark:text-green-400" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Pending Approval
+              </p>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                {doctorStats.notApproved}
+              </h3>
+            </div>
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+              <Clock
+                className="text-yellow-600 dark:text-yellow-400"
+                size={24}
+              />
             </div>
           </div>
         </div>

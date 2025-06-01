@@ -309,13 +309,18 @@ export default function ProfilePage() {
                         className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Select Speciality</option>
-                        <option value="dentist">Dentist</option>
+                        <option value="Dentistry">Dentistry</option>
+                        <option value="Genralist">Genralist</option>
                         <option value="Cardiologist">Cardiologist</option>
                         <option value="Neurologist">Neurologist</option>
+                        <option value="ENT">ENT</option>
                         <option value="Dermatologist">Dermatologist</option>
-                        <option value="Orthopedic">Orthopedic</option>
                         <option value="Gynecologist">Gynecologist</option>
-                        <option value="genralist">Generalist</option>
+                        <option value="Orthopedic">Orthopedic</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="Ophthalmologist">Ophthalmologist</option>
+                        <option value="Psychiatrist">Psychiatrist</option>
+                        <option value="Urologist">Urologist</option>
                       </select>
                     </div>
                     <div>

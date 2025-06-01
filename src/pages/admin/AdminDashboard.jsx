@@ -22,8 +22,14 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  BarChart,
+  Bar,
 } from "recharts";
-import { getAdminStats } from "../../services/api";
+import { getAdminStats, getSpecialtyData } from "../../services/api";
 
 const userGrowthData = [
   { name: "Jan", users: 65 },
@@ -49,6 +55,23 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [specialtyData, setSpecialtyData] = useState([]);
+  const [loadingSpecialty, setLoadingSpecialty] = useState(true);
+
+  const COLORS = [
+    "#FF6B6B", 
+    "#4ECDC4", 
+    "#45B7D1", 
+    "#96CEB4",
+    "#FFEEAD",
+    "#D4A5A5",
+    "#9B59B6",
+    "#3498DB",
+    "#E67E22",
+    "#2ECC71",
+    "#F1C40F",
+    "#1ABC9C",
+  ];
 
   useEffect(() => {
     const darkModeMediaQuery = window.matchMedia(
@@ -74,8 +97,6 @@ export default function AdminDashboard() {
               title: "Total Users",
               value: totalUser.toString(),
               icon: <Users className="h-6 w-6 text-blue-500" />,
-              change: "+12%",
-              isIncrease: true,
               bgGradient: "from-blue-500/20 to-transparent",
               borderColor: "border-blue-500/30",
             },
@@ -83,8 +104,6 @@ export default function AdminDashboard() {
               title: "Total Doctors",
               value: totalDoctor.toString(),
               icon: <Stethoscope className="h-6 w-6 text-green-500" />,
-              change: "+8%",
-              isIncrease: true,
               bgGradient: "from-green-500/20 to-transparent",
               borderColor: "border-green-500/30",
             },
@@ -92,8 +111,6 @@ export default function AdminDashboard() {
               title: "Appointments",
               value: totalAppointment.toString(),
               icon: <Calendar className="h-6 w-6 text-purple-500" />,
-              change: "-3%",
-              isIncrease: false,
               bgGradient: "from-purple-500/20 to-transparent",
               borderColor: "border-purple-500/30",
             },
@@ -101,8 +118,6 @@ export default function AdminDashboard() {
               title: "Growth Rate",
               value: "15.2%",
               icon: <TrendingUp className="h-6 w-6 text-orange-500" />,
-              change: "+2.3%",
-              isIncrease: true,
               bgGradient: "from-orange-500/20 to-transparent",
               borderColor: "border-orange-500/30",
             },
@@ -121,6 +136,28 @@ export default function AdminDashboard() {
     };
 
     fetchAdminStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchSpecialtyData = async () => {
+      try {
+        setLoadingSpecialty(true);
+        const response = await getSpecialtyData();
+        if (response.success) {
+          const data = Object.entries(response.data).map(([name, value]) => ({
+            name,
+            value,
+          }));
+          setSpecialtyData(data);
+        }
+      } catch (err) {
+        console.error("Error fetching specialty data:", err);
+      } finally {
+        setLoadingSpecialty(false);
+      }
+    };
+
+    fetchSpecialtyData();
   }, []);
 
   const toggleDarkMode = () => {
@@ -196,20 +233,6 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                     </div>
-                    <div
-                      className={`flex items-center ${
-                        stat.isIncrease ? "text-green-500" : "text-red-500"
-                      } bg-white dark:bg-gray-700 px-2 py-1 rounded-full shadow-sm`}
-                    >
-                      {stat.isIncrease ? (
-                        <ArrowUp className="h-3 w-3" />
-                      ) : (
-                        <ArrowDown className="h-3 w-3" />
-                      )}
-                      <span className="ml-1 text-xs font-medium">
-                        {stat.change}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -221,94 +244,101 @@ export default function AdminDashboard() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                User Growth
+                Doctors by Specialty
               </h3>
               <div className="text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full">
-                +12% this month
+                Distribution
               </div>
             </div>
             <div className="h-72 sm:h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={userGrowthData}>
-                  <defs>
-                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="name" tick={{ fill: "#6B7280" }} />
-                  <YAxis tick={{ fill: "#6B7280" }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      borderColor: "#E5E7EB",
-                      borderRadius: "0.375rem",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="users"
-                    stroke="#3B82F6"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorUsers)"
-                    activeDot={{
-                      r: 6,
-                      fill: "#3B82F6",
-                      stroke: "#FFFFFF",
-                      strokeWidth: 2,
-                    }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {loadingSpecialty ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={specialtyData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        `${name} (${(percent * 100).toFixed(0)}%)`
+                      }
+                      outerRadius={80}
+                      fill="#FF6B6B"
+                      dataKey="value"
+                    >
+                      {specialtyData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        borderColor: "#E5E7EB",
+                        borderRadius: "0.375rem",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                      }}
+                      formatter={(value) => [`${value} doctors`, "Count"]}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Doctor Growth
+                Doctors by Specialty
               </h3>
               <div className="text-sm bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-3 py-1 rounded-full">
-                +8% this month
+                Bar View
               </div>
             </div>
             <div className="h-72 sm:h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={doctorGrowthData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="name" tick={{ fill: "#6B7280" }} />
-                  <YAxis tick={{ fill: "#6B7280" }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      borderColor: "#E5E7EB",
-                      borderRadius: "0.375rem",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="doctors"
-                    stroke="#10B981"
-                    strokeWidth={2}
-                    dot={{
-                      fill: "#10B981",
-                      strokeWidth: 2,
-                      r: 4,
-                      stroke: "#FFFFFF",
-                    }}
-                    activeDot={{
-                      r: 6,
-                      fill: "#10B981",
-                      stroke: "#FFFFFF",
-                      strokeWidth: 2,
-                    }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {loadingSpecialty ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={specialtyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fill: "#6B7280" }}
+                      angle={-35}
+                      textAnchor="end"
+                      height={70}
+                    />
+                    <YAxis tick={{ fill: "#6B7280" }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        borderColor: "#E5E7EB",
+                        borderRadius: "0.375rem",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                      }}
+                      formatter={(value) => [`${value} doctors`, "Count"]}
+                    />
+                    <Bar dataKey="value" fill="#4ECDC4" radius={[4, 4, 0, 0]}>
+                      {specialtyData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>

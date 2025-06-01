@@ -23,12 +23,12 @@ export default function Home() {
 
   const specialties = [
     {
-      name: "dentist",
+      name: "Dentistry",
       icon: <Stethoscope className="text-blue-500" size={24} />,
       description: "Oral & Dental Care",
     },
     {
-      name: "genralist",
+      name: "Genralist",
       icon: <Heart className="text-blue-500" size={24} />,
       description: "Primary Healthcare",
     },

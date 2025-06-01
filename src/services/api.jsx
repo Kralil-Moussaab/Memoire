@@ -767,4 +767,17 @@ export const getStatsDoctor = async () => {
   }
 };
 
+export const getSpecialtyData = async () => {
+  try {
+    const response = await api.get("admin/circle");
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching specialty data:`, error);
+    throw error;
+  }
+};
+
 export default api;

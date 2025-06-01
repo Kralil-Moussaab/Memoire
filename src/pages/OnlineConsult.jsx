@@ -219,17 +219,16 @@ export default function OnlineConsult() {
 
   const handleSaveChat = async (shouldSave) => {
     try {
-      if (shouldSave) {
-        const response = await reviewDoctor(sessionId, rating, "saved");
-        if (response.success) {
-          setShowSaveModal(false);
-          handleBackToList();
-        } else {
-          console.error("Failed to save chat:", response.error);
-        }
-      } else {
+      const response = await reviewDoctor(
+        sessionId,
+        rating,
+        shouldSave ? "saved" : "discard"
+      );
+      if (response.success) {
         setShowSaveModal(false);
         handleBackToList();
+      } else {
+        console.error("Failed to save chat:", response.error);
       }
     } catch (error) {
       console.error("Error saving chat:", error);
@@ -522,7 +521,7 @@ export default function OnlineConsult() {
                         size={20}
                         className="text-gray-600 dark:text-gray-400"
                       />
-                    </button>                  
+                    </button>
                   </div>
                 </div>
 
