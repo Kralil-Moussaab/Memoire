@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Gem, CreditCard, Check, ArrowLeft, Shield, Clock, Zap, X, Loader, Eye, EyeOff } from "lucide-react";
+import {
+  Gem,
+  CreditCard,
+  Check,
+  ArrowLeft,
+  Shield,
+  Clock,
+  Zap,
+  X,
+  Loader,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { bayingJewels } from "../services/api";
 import { Message } from "../shared/Message";
@@ -8,36 +20,36 @@ const jewelsPackages = [
   {
     id: 1,
     amount: 100,
-    price: 9.99,
+    price: 2.99,
     popular: false,
-    perJewel: "0.099¢ per jewel",
+    perJewel: "2.99¢ per jewel",
     color: "from-purple-500 to-indigo-500",
   },
   {
     id: 2,
     amount: 500,
-    price: 44.99,
+    price: 10.99,
     popular: true,
-    savings: "10% savings",
-    perJewel: "0.089¢ per jewel",
+    savings: "26% savings",
+    perJewel: "2.20¢ per jewel",
     color: "from-blue-500 to-cyan-500",
   },
   {
     id: 3,
     amount: 1000,
-    price: 84.99,
+    price: 19.99,
     popular: false,
-    savings: "15% savings",
-    perJewel: "0.084¢ per jewel",
+    savings: "33% savings",
+    perJewel: "2.00¢ per jewel",
     color: "from-green-500 to-emerald-500",
   },
   {
     id: 4,
     amount: 2000,
-    price: 159.99,
+    price: 34.99,
     popular: false,
-    savings: "20% savings",
-    perJewel: "0.079¢ per jewel",
+    savings: "41% savings",
+    perJewel: "1.75¢ per jewel",
     color: "from-orange-500 to-amber-500",
   },
 ];
@@ -119,7 +131,7 @@ export default function JewelsPage() {
         ExpiryDate: expiry,
         CVC: cvc,
         package: selectedPackage.id.toString(),
-        password: password
+        password: password,
       });
 
       const response = await bayingJewels(purchaseData);
@@ -135,7 +147,9 @@ export default function JewelsPage() {
         if (response.error === "Unauthorized to update the balance.") {
           setError("There is an error in the password!!!.Please try again");
         } else {
-          setError(response.error || "Failed to purchase jewels. Please try again.");
+          setError(
+            response.error || "Failed to purchase jewels. Please try again."
+          );
         }
       }
     } catch (err) {
@@ -196,7 +210,8 @@ export default function JewelsPage() {
                   Purchase Successful!
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  {selectedPackage?.amount} Jewels have been added to your account.
+                  {selectedPackage?.amount} Jewels have been added to your
+                  account.
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Redirecting...
@@ -223,7 +238,11 @@ export default function JewelsPage() {
 
               {error && !showPasswordModal && (
                 <div className="mb-6">
-                  <Message type="error" message={error} onClose={() => setError("")} />
+                  <Message
+                    type="error"
+                    message={error}
+                    onClose={() => setError("")}
+                  />
                 </div>
               )}
 
@@ -281,7 +300,8 @@ export default function JewelsPage() {
                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center text-lg font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   <Gem className="w-6 h-6 mr-2" />
-                  Purchase {selectedPackage?.amount} Jewels for ${selectedPackage?.price}
+                  Purchase {selectedPackage?.amount} Jewels for $
+                  {selectedPackage?.price}
                 </button>
                 <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                   By purchasing, you agree to our Terms of Service
@@ -308,13 +328,19 @@ export default function JewelsPage() {
 
               {error && (
                 <div className="mb-6">
-                  <Message type="error" message={error} onClose={() => setError("")} />
+                  <Message
+                    type="error"
+                    message={error}
+                    onClose={() => setError("")}
+                  />
                 </div>
               )}
 
               <div className="mb-6">
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Please enter your password to confirm the purchase of {selectedPackage?.amount} Jewels for ${selectedPackage?.price}.
+                  Please enter your password to confirm the purchase of{" "}
+                  {selectedPackage?.amount} Jewels for ${selectedPackage?.price}
+                  .
                 </p>
 
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

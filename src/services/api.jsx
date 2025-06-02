@@ -780,4 +780,18 @@ export const getSpecialtyData = async () => {
   }
 };
 
+export const getAgeData = async () => {
+  try {
+    const response = await api.get("admin/diagram");
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(`Error fetching age data:`, error);
+    throw error;
+  }
+};
+
+
 export default api;

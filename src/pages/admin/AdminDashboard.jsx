@@ -29,7 +29,11 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { getAdminStats, getSpecialtyData } from "../../services/api";
+import {
+  getAdminStats,
+  getSpecialtyData,
+  getAgeData,
+} from "../../services/api";
 
 const userGrowthData = [
   { name: "Jan", users: 65 },
@@ -57,11 +61,13 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
   const [specialtyData, setSpecialtyData] = useState([]);
   const [loadingSpecialty, setLoadingSpecialty] = useState(true);
+  const [ageData, setAgeData] = useState([]);
+  const [loadingAge, setLoadingAge] = useState(true);
 
   const COLORS = [
-    "#FF6B6B", 
-    "#4ECDC4", 
-    "#45B7D1", 
+    "#FF6B6B",
+    "#4ECDC4",
+    "#45B7D1",
     "#96CEB4",
     "#FFEEAD",
     "#D4A5A5",
@@ -158,6 +164,30 @@ export default function AdminDashboard() {
     };
 
     fetchSpecialtyData();
+  }, []);
+
+  useEffect(() => {
+    const fetchAgeData = async () => {
+      try {
+        setLoadingAge(true);
+        const response = await getAgeData();
+        if (response.success) {
+          const formattedData = [
+            { name: "Kids (0-12)", value: response.data.kids },
+            { name: "Teen (13-21)", value: response.data.teen },
+            { name: "Adult (22-49)", value: response.data.adult },
+            { name: "Olders (50-99)", value: response.data.olders },
+          ];
+          setAgeData(formattedData);
+        }
+      } catch (err) {
+        console.error("Error fetching age data:", err);
+      } finally {
+        setLoadingAge(false);
+      }
+    };
+
+    fetchAgeData();
   }, []);
 
   const toggleDarkMode = () => {
@@ -257,59 +287,10 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={specialtyData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name} (${(percent * 100).toFixed(0)}%)`
-                      }
-                      outerRadius={80}
-                      fill="#FF6B6B"
-                      dataKey="value"
-                    >
-                      {specialtyData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#FFFFFF",
-                        borderColor: "#E5E7EB",
-                        borderRadius: "0.375rem",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                      }}
-                      formatter={(value) => [`${value} doctors`, "Count"]}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Doctors by Specialty
-              </h3>
-              <div className="text-sm bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-3 py-1 rounded-full">
-                Bar View
-              </div>
-            </div>
-            <div className="h-72 sm:h-80">
-              {loadingSpecialty ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={specialtyData}>
+                  <BarChart
+                    data={specialtyData}
+                    margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis
                       dataKey="name"
@@ -317,6 +298,18 @@ export default function AdminDashboard() {
                       angle={-35}
                       textAnchor="end"
                       height={70}
+                      interval={0}
+                      tickFormatter={(value) => {
+                        if (value.length > 15) {
+                          return value
+                            .split(" ")
+                            .map((word, i) =>
+                              i % 2 === 0 ? word : word + "\n"
+                            )
+                            .join(" ");
+                        }
+                        return value;
+                      }}
                     />
                     <YAxis tick={{ fill: "#6B7280" }} />
                     <Tooltip
@@ -337,6 +330,58 @@ export default function AdminDashboard() {
                       ))}
                     </Bar>
                   </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Age Distribution
+              </h3>
+              <div className="text-sm bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full">
+                Patient Ages
+              </div>
+            </div>
+            <div className="h-72 sm:h-80">
+              {loadingAge ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={ageData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        `${name} (${(percent * 100).toFixed(0)}%)`
+                      }
+                      outerRadius={80}
+                      fill="#9B59B6"
+                      dataKey="value"
+                    >
+                      {ageData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        borderColor: "#E5E7EB",
+                        borderRadius: "0.375rem",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                      }}
+                      formatter={(value) => [`${value} patients`, "Count"]}
+                    />
+                    <Legend />
+                  </PieChart>
                 </ResponsiveContainer>
               )}
             </div>
