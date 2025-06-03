@@ -76,14 +76,29 @@ export default function OnlineConsult() {
 
         const response = await listDoctors(params);
         if (response && response.data) {
+          const specialtyPrices = {
+            Cardiologist: 60,
+            Neurologist: 60,
+            Pediatrician: 58,
+            Gynecologist: 56,
+            Psychiatrist: 54,
+            General: 52,
+            Urologist: 50,
+            Ophthalmologist: 48,
+            Orthopedic: 46,
+            ENT: 44,
+            Dermatologist: 42,
+            Dentistry: 40,
+          };
+
           const formattedDoctors = response.data.map((doctor) => ({
             id: doctor.id,
             name: doctor.name || "Unknown Doctor",
-            specialty: doctor.speciality || "Specialist",
+            specialty: doctor.speciality || "General",
             image:
               doctor.picture ||
               "https://randomuser.me/api/portraits/lego/0.jpg",
-            amount: doctor.consultPrice || Math.floor(Math.random() * 20) + 40,
+            amount: specialtyPrices[doctor.speciality] || 52,
           }));
 
           setOnlineDoctors(formattedDoctors);
