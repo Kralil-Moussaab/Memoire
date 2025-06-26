@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Home,
+  DollarSign,
 } from "lucide-react";
 import {
   AreaChart,
@@ -97,7 +98,8 @@ export default function AdminDashboard() {
         setLoading(true);
         const response = await getAdminStats();
         if (response.success) {
-          const { totalUser, totalDoctor, totalAppointment } = response.data;
+          const { totalUser, totalDoctor, totalAppointment, amount } =
+            response.data;
           const updatedStats = [
             {
               title: "Total Users",
@@ -121,9 +123,9 @@ export default function AdminDashboard() {
               borderColor: "border-purple-500/30",
             },
             {
-              title: "Growth Rate",
-              value: "15.2%",
-              icon: <TrendingUp className="h-6 w-6 text-orange-500" />,
+              title: "Revenue",
+              value: Number(amount).toFixed(2),
+              icon: <DollarSign className="h-6 w-6 text-orange-500" />,
               bgGradient: "from-orange-500/20 to-transparent",
               borderColor: "border-orange-500/30",
             },

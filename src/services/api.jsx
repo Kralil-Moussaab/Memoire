@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
+  // baseURL: "http://192.168.1.106:8000/api/v1",
   baseURL: "http://localhost:8000/api/v1",
+
   headers: {
     "Content-Type": "application/json",
   },
@@ -793,5 +795,20 @@ export const getAgeData = async () => {
   }
 };
 
+export const deletAppointment = async (id) => {
+  try {
+    const response = await api.delete(`/appointments/${id}`);
+    return {
+      success: true,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error(`Error deleting Appointment with id ${id}:`, error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to delete Appointment",
+    };
+  }
+};
 
 export default api;

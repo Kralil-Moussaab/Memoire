@@ -17,10 +17,12 @@ export default function FindDoctors() {
   const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationSearch, setLocation] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [genderFilter, setGenderFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
   const [success, setSuccess] = useState(null);
 
@@ -43,6 +45,67 @@ const specialties = [
   const genders = [
     { value: "male", label: "Male" },
     { value: "female", label: "Female" },
+  ];
+
+  const cities = [
+    "Adrar",
+    "Chlef",
+    "Laghouat",
+    "Oum El Bouaghi",
+    "Batna",
+    "Béjaïa",
+    "Biskra",
+    "Béchar",
+    "Blida",
+    "Bouira",
+    "Tamanrasset",
+    "Tébessa",
+    "Tlemcen",
+    "Tiaret",
+    "Tizi Ouzou",
+    "Alger",
+    "Djelfa",
+    "Jijel",
+    "Sétif",
+    "Saïda",
+    "Skikda",
+    "Sidi Bel Abbès",
+    "Annaba",
+    "Guelma",
+    "Constantine",
+    "Médéa",
+    "Mostaganem",
+    "M'Sila",
+    "Mascara",
+    "Ouargla",
+    "Oran",
+    "El Bayadh",
+    "Illizi",
+    "Bordj Bou Arréridj",
+    "Boumerdès",
+    "El Tarf",
+    "Tindouf",
+    "Tissemsilt",
+    "El Oued",
+    "Khenchela",
+    "Souk Ahras",
+    "Tipaza",
+    "Mila",
+    "Aïn Defla",
+    "Naâma",
+    "Aïn Témouchent",
+    "Ghardaïa",
+    "Relizane",
+    "Timimoun",
+    "Bordj Badji Mokhtar",
+    "Ouled Djellal",
+    "Béni Abbès",
+    "In Salah",
+    "In Guezzam",
+    "Touggourt",
+    "Djanet",
+    "El M'Ghair",
+    "El Menia",
   ];
 
   useEffect(() => {
@@ -127,7 +190,7 @@ const specialties = [
         fetchDoctors();
       }
     }
-  }, [specialtyFilter, genderFilter, activeFilters]);
+  }, [specialtyFilter, genderFilter, cityFilter, activeFilters]);
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -267,7 +330,7 @@ const specialties = [
 
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
-    setShowSortDropdown(false);
+    closeAllDropdowns();
 
     const sortedDoctors = [...doctors];
     if (sortOption === "Rating") {
@@ -284,7 +347,7 @@ const specialties = [
 
   const handleSpecialtyChange = (specialty) => {
     setSpecialtyFilter(specialty);
-    setShowSpecialtyDropdown(false);
+    closeAllDropdowns();
 
     setActiveFilters({
       ...activeFilters,
@@ -294,11 +357,21 @@ const specialties = [
 
   const handleGenderChange = (gender) => {
     setGenderFilter(gender);
-    setShowGenderDropdown(false);
+    closeAllDropdowns();
 
     setActiveFilters({
       ...activeFilters,
       gender: gender,
+    });
+  };
+
+  const handleCityChange = (city) => {
+    setCityFilter(city);
+    closeAllDropdowns();
+
+    setActiveFilters({
+      ...activeFilters,
+      location: city,
     });
   };
 
@@ -307,8 +380,36 @@ const specialties = [
     setLocation("");
     setSpecialtyFilter("");
     setGenderFilter("");
+    setCityFilter("");
     setActiveFilters({});
     setCurrentPage(1);
+  };
+
+  const closeAllDropdowns = () => {
+    setShowSpecialtyDropdown(false);
+    setShowSortDropdown(false);
+    setShowGenderDropdown(false);
+    setShowCityDropdown(false);
+  };
+
+  const handleSpecialtyDropdownToggle = () => {
+    closeAllDropdowns();
+    setShowSpecialtyDropdown(!showSpecialtyDropdown);
+  };
+
+  const handleGenderDropdownToggle = () => {
+    closeAllDropdowns();
+    setShowGenderDropdown(!showGenderDropdown);
+  };
+
+  const handleCityDropdownToggle = () => {
+    closeAllDropdowns();
+    setShowCityDropdown(!showCityDropdown);
+  };
+
+  const handleSortDropdownToggle = () => {
+    closeAllDropdowns();
+    setShowSortDropdown(!showSortDropdown);
   };
 
   const handleViewProfile = (doctorId) => {
@@ -370,9 +471,7 @@ const specialties = [
             <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
               <div className="relative">
                 <button
-                  onClick={() =>
-                    setShowSpecialtyDropdown(!showSpecialtyDropdown)
-                  }
+                  onClick={handleSpecialtyDropdownToggle}
                   className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
                 >
                   Specialty: {specialtyFilter || "All"}
@@ -403,7 +502,7 @@ const specialties = [
 
               <div className="relative">
                 <button
-                  onClick={() => setShowGenderDropdown(!showGenderDropdown)}
+                  onClick={handleGenderDropdownToggle}
                   className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
                 >
                   Gender:{" "}
@@ -439,7 +538,38 @@ const specialties = [
 
               <div className="relative">
                 <button
-                  onClick={() => setShowSortDropdown(!showSortDropdown)}
+                  onClick={handleCityDropdownToggle}
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
+                >
+                  City: {cityFilter || "All"}
+                  <ChevronDown size={16} />
+                </button>
+                {showCityDropdown && (
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                    <div className="p-2">
+                      <button
+                        onClick={() => handleCityChange("")}
+                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
+                      >
+                        All Cities
+                      </button>
+                      {cities.map((city) => (
+                        <button
+                          key={city}
+                          onClick={() => handleCityChange(city)}
+                          className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded cursor-pointer text-gray-800 dark:text-slate-100"
+                        >
+                          {city}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative">
+                <button
+                  onClick={handleSortDropdownToggle}
                   className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-blue-500 transition-colors cursor-pointer text-gray-800 dark:text-slate-100"
                 >
                   Sort By: {sortBy}

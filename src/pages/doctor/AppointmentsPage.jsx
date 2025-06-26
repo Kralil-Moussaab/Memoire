@@ -20,6 +20,7 @@ import {
   addAppointmentSlots,
   getAppointmentSlotsById,
   getApproveAppointment,
+  deletAppointment,
 } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -39,6 +40,9 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
+  const [showDeleteSlotModal, setShowDeleteSlotModal] = useState(false);
+  const [slotToDelete, setSlotToDelete] = useState(null);
+  const [deletingSlot, setDeletingSlot] = useState(false);
 
   useEffect(() => {
     const fetchApprovedAppointments = async () => {
@@ -195,9 +199,34 @@ export default function AppointmentsPage() {
     }
   };
 
-  const handleDeleteSlot = (id) => {
-    setAvailableSlots(availableSlots.filter((slot) => slot.id !== id));
-    setSuccess("Appointment slots deleted successfully!");
+  const handleDeleteSlot = (slot) => {
+    setSlotToDelete(slot);
+    setShowDeleteSlotModal(true);
+  };
+
+  const confirmDeleteSlot = async () => {
+    if (!slotToDelete) return;
+
+    setDeletingSlot(true);
+    setError("");
+
+    try {
+      const result = await deletAppointment(slotToDelete.id);
+
+      if (result.success) {
+        setAvailableSlots(availableSlots.filter(slot => slot.id !== slotToDelete.id));
+        setSuccess("Slot deleted successfully!");
+        setShowDeleteSlotModal(false);
+        setSlotToDelete(null);
+      } else {
+        setError(result.error || "Failed to delete slot");
+      }
+    } catch (error) {
+      setError("An error occurred while deleting the slot");
+      console.error(error);
+    } finally {
+      setDeletingSlot(false);
+    }
   };
 
   const groupSlotsByDate = (slots) => {
@@ -250,40 +279,34 @@ export default function AppointmentsPage() {
                   </p>
                 </div>
               ) : availableSlots.length > 0 ? (
-                Object.entries(groupSlotsByDate(availableSlots)).map(
-                  ([date, times], index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 hover:shadow-md transition-all duration-200"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex items-center">
-                          <Calendar className="w-5 h-5 text-blue-500 mr-2" />
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {new Date(date).toLocaleDateString("en-GB")}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteSlot(date)}
-                          className="text-red-500 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                availableSlots.map((slot, index) => (
+                  <div
+                    key={slot.id || index}
+                    className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 hover:shadow-md transition-all duration-200"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center">
+                        <Calendar className="w-5 h-5 text-blue-500 mr-2" />
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {new Date(slot.date).toLocaleDateString("en-GB")}
+                        </span>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {times.map((time, timeIndex) => (
-                          <span
-                            key={timeIndex}
-                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm flex items-center shadow-sm"
-                          >
-                            <Clock className="w-4 h-4 mr-1" />
-                            {time}
-                          </span>
-                        ))}
-                      </div>
+                      <button
+                        onClick={() => handleDeleteSlot(slot)}
+                        className="text-red-500 hover:text-red-600 transition-colors"
+                        title="Delete this slot"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                  )
-                )
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm flex items-center shadow-sm">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {slot.time}
+                      </span>
+                    </div>
+                  </div>
+                ))
               ) : (
                 <p className="text-center text-gray-500 dark:text-gray-400 py-4">
                   No available slots found
@@ -294,52 +317,6 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search appointments..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => filterAppointments("all")}
-                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                    activeFilter === "all"
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => filterAppointments("upcoming")}
-                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                    activeFilter === "upcoming"
-                      ? "bg-green-500 text-white shadow-md"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                  }`}
-                >
-                  Upcoming
-                </button>
-                <button
-                  onClick={() => filterAppointments("completed")}
-                  className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                    activeFilter === "completed"
-                      ? "bg-gray-500 text-white shadow-md"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                  }`}
-                >
-                  Completed
-                </button>
-              </div>
-            </div>
-          </div>
 
           <div className="space-y-4">
             {loadingAppointments ? (
@@ -531,6 +508,71 @@ export default function AppointmentsPage() {
                 }`}
               >
                 {loading ? "Adding..." : "Add Slots"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteSlotModal && (
+        <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-40">
+          <div className="bg-white dark:bg-gray-800 border-1 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Confirm Delete Slot
+              </h3>
+              <button
+                onClick={() => {
+                  setShowDeleteSlotModal(false);
+                  setSlotToDelete(null);
+                }}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete this available slot?
+              </p>
+              
+              {slotToDelete && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-2">
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>{new Date(slotToDelete.date).toLocaleDateString("en-GB")}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <Clock className="w-4 h-4 mr-2" />
+                    <span>{slotToDelete.time}</span>
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-sm text-red-600 dark:text-red-400">
+                This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowDeleteSlotModal(false);
+                  setSlotToDelete(null);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteSlot}
+                disabled={deletingSlot}
+                className={`px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors ${
+                  deletingSlot ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {deletingSlot ? "Deleting..." : "Delete Slot"}
               </button>
             </div>
           </div>

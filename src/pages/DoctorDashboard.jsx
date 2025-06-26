@@ -80,7 +80,7 @@ export default function DoctorDashboard() {
         },
         {
           title: "Rating",
-          value: stats.Rating.toString(),
+          value: Number(stats.Rating).toFixed(2),
           icon: <Star className="h-6 w-6 text-yellow-500" />,
         },
         {

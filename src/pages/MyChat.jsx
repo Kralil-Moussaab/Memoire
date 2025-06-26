@@ -113,7 +113,7 @@ export default function MyChat() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 h-[calc(100vh-8rem)] sm:h-[calc(100vh-10rem)]">
           {/* Doctor List Panel */}
           <div
-            className={`lg:col-span-4 xl:col-span-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
+            className={`lg:col-span-4 xl:col-span-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
               !showDoctorList && "hidden lg:block"
             }`}
           >
@@ -136,7 +136,7 @@ export default function MyChat() {
                   onlineDoctors.map((doctor, index) => (
                     <div
                       key={`${doctor.id}-${doctor.sessionId}`}
-                      className="group relative dark rounded-xl p-3 sm:p-4 border-gray-300 dark:border-gray-600 hover:from-blue-50 hover:to-blue-100 dark:hover:from-gray-600 dark:hover:to-gray-650 transition-all duration-300 cursor-pointer border hover:border-blue-200 dark:hover:border-blue-700"
+                      className="group relative dark rounded-xl p-3 sm:p-2 border-gray-300 dark:border-gray-600 hover:from-blue-50 hover:to-blue-100 dark:hover:from-gray-600 dark:hover:to-gray-650 transition-all duration-300 cursor-pointer border hover:border-blue-200 dark:hover:border-blue-700"
                       onClick={() => handleStartChat(doctor)}
                     >
                       <div className="flex items-center space-x-3 sm:space-x-4">
@@ -152,7 +152,7 @@ export default function MyChat() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold dark:text-white truncate text-sm sm:text-base">
+                          <h3 className="font-semibold text-gray-700 dark:text-gray-400 truncate text-sm sm:text-base">
                             {doctor.name}
                           </h3>
                           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
@@ -206,7 +206,7 @@ export default function MyChat() {
 
           {/* Chat Panel */}
           <div
-            className={`lg:col-span-8 xl:col-span-9 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
+            className={`lg:col-span-8 xl:col-span-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
               showDoctorList && !selectedDoctor && "hidden lg:block"
             }`}
           >
